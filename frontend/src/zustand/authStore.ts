@@ -1,22 +1,24 @@
 import { create } from "zustand";
-
-type UpdateAuth = {
-  userName: string;
-  email: string;
-  userId: number;
-};
+import { User } from "../types";
 
 type AuthState = {
-  userName: string;
-  email: string;
-  userId: number | null;
-  updateAuth: (auth: UpdateAuth) => void;
+  Username: null | string;
+  UserEmail: null | string;
+  UserId: null | number;
 };
 
-export const useAuthStore = create<AuthState>()((set) => ({
-  userName: "",
-  email: "",
-  userId: null,
-  updateAuth: (auth: UpdateAuth) =>
-    set({ userName: auth.userName, email: auth.email, userId: auth.userId }),
+type AuthAction = {
+  updateAuth: (auth: AuthState) => void;
+};
+
+export const useAuthStore = create<AuthState & AuthAction>()((set) => ({
+  Username: null,
+  UserEmail: null,
+  UserId: null,
+  updateAuth: (auth) =>
+    set({
+      Username: auth.UserEmail,
+      UserEmail: auth.UserEmail,
+      UserId: auth.UserId,
+    }),
 }));

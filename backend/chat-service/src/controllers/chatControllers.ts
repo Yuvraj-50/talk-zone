@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prismaClient";
 import { Role } from "@prisma/client";
+import { CHATTYPE } from "../types";
 
 interface Message {
   id: number;
@@ -14,7 +15,7 @@ interface Message {
 }
 
 export async function CreateChat(req: Request, res: Response) {
-  const loggedInUserId = req.user?.userId;
+  const loggedInUserId = req.user?.id;
 
   const { members, chatType, groupName, createrId } = req.body;
 
@@ -25,14 +26,14 @@ export async function CreateChat(req: Request, res: Response) {
     return;
   }
 
-  if (chatType !== "group" && chatType !== "oneToOne") {
+  if (chatType !== CHATTYPE.ONETOONE && chatType !== CHATTYPE.GROUPCHAT) {
     res
       .status(400)
       .json({ error: "Invalid chat type. Must be 'group' or 'oneToOne'." });
     return;
   }
 
-  if (chatType === "group" && (!groupName || !createrId)) {
+  if (chatType === CHATTYPE.GROUPCHAT && (!groupName || !createrId)) {
     res.status(400).json({
       error: "Group name and creator ID are required for group chats.",
     });
@@ -67,7 +68,7 @@ export async function CreateChat(req: Request, res: Response) {
     // TODO SEND CHATMEMBERS ALSO
     const chatMembers = await Promise.all(memberPromises);
 
-    if (chatType == "group") {
+    if (chatType == CHATTYPE.GROUPCHAT) {
       res.status(201).json({
         message: "Chat created successfully",
         chatId: chatData.id,
@@ -104,7 +105,9 @@ export async function CreateChat(req: Request, res: Response) {
 }
 
 export async function GetChat(req: Request, res: Response) {
-  const loggedInUserId = req.user?.userId;
+  const loggedInUserId = req.user?.id;
+
+  console.log(loggedInUserId);
 
   try {
     const chatMemberships = await prisma.chatMembers.findMany({
@@ -132,7 +135,7 @@ export async function GetChat(req: Request, res: Response) {
     type createChatData = {
       chatId: number;
       chatName: string;
-      chatType: "oneToOne" | "groupchat";
+      chatType: CHATTYPE;
       chatMembers: {
         userId: number;
         userName: string;
@@ -148,7 +151,7 @@ export async function GetChat(req: Request, res: Response) {
             chatId: membership.chatId,
             chatName: chat.name,
             chatMembers: membership.chat.chatmembers,
-            chatType: "groupchat",
+            chatType: CHATTYPE.GROUPCHAT,
           };
         } else {
           const otherMember = chat.chatmembers.find(
@@ -159,7 +162,7 @@ export async function GetChat(req: Request, res: Response) {
             chatId: membership.chatId,
             chatName: otherMember?.userName || "Unknown User",
             chatMembers: membership.chat.chatmembers,
-            chatType: "oneToOne",
+            chatType: CHATTYPE.ONETOONE,
           };
         }
       }
@@ -173,7 +176,7 @@ export async function GetChat(req: Request, res: Response) {
 export async function GetChatMessages(req: Request, res: Response) {
   try {
     const chatId: number = Number(req.params.id);
-    
+
     const messages = await prisma.$queryRaw<Message[]>`
         SELECT "Messages".*, "ChatMembers"."userId", "ChatMembers"."userName", "ChatMembers"."role"
         FROM "Messages"

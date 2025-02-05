@@ -2,11 +2,16 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import prismaClient from "../utils/db";
 import { generateToken } from "../utils/generateJwt";
-import jwt from "jsonwebtoken";
+import jwt, {
+  JwtPayload,
+  VerifyCallback,
+  VerifyErrors,
+  VerifyOptions,
+} from "jsonwebtoken";
+import { JWTPAYLOAD } from "../types";
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   const { email, name, password } = req.body;
-  console.log(email, name, password);
 
   try {
     const existingUser = await prismaClient.user.findUnique({
@@ -17,17 +22,15 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user
     const newUser = await prismaClient.user.create({
       data: { email, name, password: hashedPassword },
     });
 
     // TODO MAKE NAME COMPULSARY FIELD IN DB
-    const jwtPayload = {
-      userId: newUser.id,
+    const jwtPayload: JWTPAYLOAD = {
+      id: newUser.id,
       email: newUser.email,
       name: newUser.name,
     };
@@ -38,7 +41,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       path: "/",
-      secure: false, // Disable `Secure` for HTTP in development
+      secure: false,
       sameSite: "lax",
     });
 
@@ -55,23 +58,20 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   try {
-    // Find the user
     const user = await prismaClient.user.findUnique({ where: { email } });
     if (!user) {
       res.status(400).json({ message: "Invalid email or password" });
       return;
     }
 
-    // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       res.status(400).json({ message: "Invalid email or password" });
       return;
     }
 
-    // Generate JWT
-    const jwtPayload = {
-      userId: user.id,
+    const jwtPayload : JWTPAYLOAD = {
+      id: user.id,
       email: user.email,
       name: user.name,
     };
@@ -110,8 +110,18 @@ export const verifyUser = async (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    res.json({ authenticated: true, user: decoded });
+    jwt.verify(
+      token,
+      process.env.JWT_SECRET!,
+      (err: VerifyErrors | null, user: unknown) => {
+        if (err) {
+          res.status(401).json({ authenticated: false, user: null });
+          return;
+        }
+        const payload = user as JWTPAYLOAD;
+        res.json({ authenticated: true, user: payload });
+      }
+    );
   } catch (err) {
     res.status(401).json({ authenticated: false, user: null });
   }
@@ -131,6 +141,11 @@ export const getuser = async (req: Request, res: Response): Promise<void> => {
           contains: userName as string,
           mode: "insensitive",
         },
+      },
+      select: {
+        name: true,
+        id: true,
+        email: true,
       },
     });
 

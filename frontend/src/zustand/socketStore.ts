@@ -1,16 +1,8 @@
 import { create } from "zustand";
+import { MessageType } from "../types";
 
 interface WebSocketState {
   socket: WebSocket | null;
-}
-
-export enum MessageType {
-  SEND_MESSAGE = "SEND_MESSAGE",
-  CREATE_CHAT = "CREATE_CHAT",
-  TYPING = "TYPING",
-  ONLINE_STATUS = "ONLINE_STATUS",
-  AUTH_STATUS = "AUTH_STATUS",
-  ERROR = "ERROR",
 }
 
 interface SocketMessageRequest {

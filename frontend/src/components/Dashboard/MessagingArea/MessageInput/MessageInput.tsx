@@ -1,9 +1,8 @@
 import { useState } from "react";
 import Input from "../../../../ui/Input";
-import useWebSocketStore, {
-  MessageType,
-} from "../../../../zustand/socketStore";
+import useWebSocketStore from "../../../../zustand/socketStore";
 import useActiveChatStore from "../../../../zustand/activeChatStore";
+import { MessageType } from "../../../../types";
 
 function MessageInput() {
   const [inputValue, setInputValue] = useState<string>("");

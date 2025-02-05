@@ -3,7 +3,8 @@ import Input from "../../../ui/Input";
 import { useAuthStore } from "../../../zustand/authStore";
 import { useChatStore } from "../../../zustand/ChatsStore";
 import axios from "axios";
-import useWebSocketStore, { MessageType } from "../../../zustand/socketStore";
+import useWebSocketStore from "../../../zustand/socketStore";
+import { CHATTYPE, MessageType } from "../../../types";
 
 type User = {
   name: string;
@@ -15,11 +16,6 @@ type memberList = {
   userId: number;
   userName: string;
 };
-
-enum CHATTYPE {
-  ONETOONE = "oneToOne",
-  GROUP = "groupChat",
-}
 
 type UserDate = {
   users: {
@@ -43,7 +39,7 @@ interface NewChatProps {
 function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
-  const { userId: myUserId, email: userName } = useAuthStore();
+  const { UserId: myUserId, UserEmail: userName } = useAuthStore();
   const { chats } = useChatStore();
   const [chatType, setChatType] = useState<CHATTYPE>(CHATTYPE.ONETOONE);
   const sendMessage = useWebSocketStore((state) => state.sendMessage);
@@ -55,13 +51,13 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
   }
 
   async function handlecreateNewChat() {
-    if (myUserId) {
+    if (myUserId && userName) {
       memberList.push({ userId: myUserId, userName });
     }
 
     console.log({
       members: memberList,
-      chatType: "oneToOne",
+      chatType: CHATTYPE.ONETOONE,
       groupName: null,
       createrId: myUserId,
     });
@@ -122,7 +118,7 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
         type: MessageType.CREATE_CHAT,
         data: {
           members: memberList,
-          chatType: "oneToOne",
+          chatType: CHATTYPE.ONETOONE,
           groupName: null,
           createrId: myUserId,
         },
@@ -131,7 +127,6 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
       setMemberList([]);
     }
   }
-
 
   useEffect(() => {
     if (search === "") {

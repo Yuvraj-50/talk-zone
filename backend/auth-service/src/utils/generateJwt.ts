@@ -1,15 +1,8 @@
 import jwt from "jsonwebtoken";
+import { JWTPAYLOAD } from "../types";
 
-type payload = {
-  userId: number;
-  email: string;
-  name: string | null;
-};
-
-export const generateToken = (jwtPayload: payload) => {
+export const generateToken = (jwtPayload: JWTPAYLOAD) => {
   return jwt.sign({ ...jwtPayload }, process.env.JWT_SECRET as string, {
     expiresIn: process.env.JWT_EXPIRY,
   });
 };
-
-

@@ -1,35 +1,21 @@
 import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
 import Input from "../../../ui/Input";
 import { useAuthStore } from "../../../zustand/authStore";
-import useWebSocketStore, { MessageType } from "../../../zustand/socketStore";
-
-type MemberList = {
-  userId: number;
-  userName: string;
-};
-
-type createChatData = {
-  chatId: number;
-  chatName: string;
-  chatType: "oneToOne" | "groupchat";
-  chatMembers: {
-    userId: number;
-    userName: string;
-  }[];
-};
+import useWebSocketStore from "../../../zustand/socketStore";
+import { ChatMembers, MessageType } from "../../../types";
 
 interface GroupDetailsProps {
-  memberList: MemberList[];
-  setMemberList: Dispatch<SetStateAction<MemberList[]>>;
+  memberList: ChatMembers[];
+  setMemberList: Dispatch<SetStateAction<ChatMembers[]>>;
 }
 
 function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
   const [groupName, setGroupName] = useState<string>("");
-  const { userId: myUserId, email: userName } = useAuthStore();
+  const { UserId: myUserId, UserEmail: userName } = useAuthStore();
   const { sendMessage, socket } = useWebSocketStore();
 
   async function handleCreateGroup() {
-    if (myUserId) {
+    if (myUserId && userName) {
       memberList.push({ userName, userId: myUserId });
     }
 
@@ -73,7 +59,6 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
       sendMessage(payload);
       setMemberList([]);
       setGroupName("");
-      
     }
   }
 

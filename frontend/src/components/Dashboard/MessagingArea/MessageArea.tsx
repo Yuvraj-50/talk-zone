@@ -4,7 +4,7 @@ import { useAuthStore } from "../../../zustand/authStore";
 
 function MessageArea({ messageLoading }: { messageLoading: any }) {
   const { messages } = useMessagesStore();
-  const { userId } = useAuthStore();
+  const { UserId } = useAuthStore();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
@@ -12,6 +12,7 @@ function MessageArea({ messageLoading }: { messageLoading: any }) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
   };
   useEffect(scrollToBottom, [messages]);
+
 
   return (
     <div>
@@ -24,12 +25,12 @@ function MessageArea({ messageLoading }: { messageLoading: any }) {
               <li
                 key={message.id}
                 className={`mb-3 rounded-full px-2 py-1 ${
-                  userId == message.senderId
+                  UserId == message.senderId
                     ? "bg-green-500 self-end"
                     : "bg-gray-400 self-start"
                 }`}
               >
-                {userId !== message.senderId && <p>{message.userName}</p>}
+                {UserId !== message.senderId && <p>{message.userName}</p>}
                 {message.message}
                 {message.senderId}
               </li>

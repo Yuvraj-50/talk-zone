@@ -6,48 +6,16 @@ import { useMessagesStore } from "../zustand/messageStore";
 import MessageArea from "./Dashboard/MessagingArea/MessageArea";
 import axios from "axios";
 import { useChatStore } from "../zustand/ChatsStore";
-import useWebSocketStore, { MessageType } from "../zustand/socketStore";
+import useWebSocketStore from "../zustand/socketStore";
 import MessageInput from "./Dashboard/MessagingArea/MessageInput/MessageInput";
 import useActiveChatStore from "../zustand/activeChatStore";
 import changeChat from "../utils";
 import { useAuthStore } from "../zustand/authStore";
+import { ChatMessage, MessageType, UserConversation } from "../types";
 
-enum Role {
-  "MEMBER",
-  "ADMIN",
-}
-
-type SendMessageType = {
-  id: number;
-  message: string;
-  senderId: number;
-  sent_at: string;
-  chatId: number;
-  role: Role;
-  userId: number;
-  userName: string;
-};
-
-type Chats = {
-  chatId: number;
-  chatName: string;
-  chatType: "oneToOne" | "groupchat";
-  chatMembers: {
-    userId: number;
-    userName: string;
-  }[];
-};
-
-type createChatData = {
-  chatId: number;
-  chatName: string;
-  chatType: "oneToOne" | "groupchat";
-  chatMembers: {
-    userId: number;
-    userName: string;
-  }[];
+interface CreateChatPayload extends UserConversation {
   createdBy: number;
-};
+}
 
 function ChatDashboard() {
   const [messageLoading, setMessageLoading] = useState<boolean>(false);
@@ -56,7 +24,7 @@ function ChatDashboard() {
   const activeChatName = useActiveChatStore((state) => state.activeChatName);
   const chats = useChatStore((state) => state.chats);
   const { updateMessages } = useMessagesStore();
-  const userId = useAuthStore((state) => state.userId);
+  const userId = useAuthStore((state) => state.UserId);
 
   const { socket, connect, disconnect, registerMessageHandler } =
     useWebSocketStore();
@@ -79,31 +47,26 @@ function ChatDashboard() {
   }, []);
 
   useEffect(() => {
-    registerMessageHandler(
-      MessageType.SEND_MESSAGE,
-      (message: SendMessageType) => {
-        if (message.chatId === activeChatId) {
-          useMessagesStore.getState().appendMessage(message);
-        }
-
-        const prevIdx = chats.findIndex(
-          (chat) => chat.chatId === message.chatId
-        );
-
-        if (prevIdx !== -1) {
-          const modifiedChat = chats[prevIdx];
-          const newList = [
-            modifiedChat,
-            ...chats.filter((_, index) => index !== prevIdx),
-          ];
-          updateChat(newList);
-        }
+    registerMessageHandler(MessageType.SEND_MESSAGE, (message: ChatMessage) => {
+      if (message.chatId === activeChatId) {
+        useMessagesStore.getState().appendMessage(message);
       }
-    );
+
+      const prevIdx = chats.findIndex((chat) => chat.chatId === message.chatId);
+
+      if (prevIdx !== -1) {
+        const modifiedChat = chats[prevIdx];
+        const newList = [
+          modifiedChat,
+          ...chats.filter((_, index) => index !== prevIdx),
+        ];
+        updateChat(newList);
+      }
+    });
 
     registerMessageHandler(
       MessageType.CREATE_CHAT,
-      async (message: createChatData) => {
+      async (message: CreateChatPayload) => {
         if (message.createdBy == userId) {
           updateActiveChatId(message.chatId);
           updateActiveChatName(message.chatName);
@@ -118,7 +81,7 @@ function ChatDashboard() {
   useEffect(() => {
     async function getAllChats() {
       try {
-        const response = await axios.get<Chats[]>(
+        const response = await axios.get<UserConversation[]>(
           "http://localhost:3000/api/v1/chat",
           {
             withCredentials: true,

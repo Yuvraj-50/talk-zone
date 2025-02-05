@@ -2,16 +2,12 @@ import { memo, useState } from "react";
 import GroupChat from "./GroupChat";
 import NewChat from "./NewChat";
 import GroupDetails from "./GroupDetails";
-
-type MemberList = {
-  userId: number;
-  userName: string;
-};
+import { ChatMembers } from "../../../types";
 
 function CreateChat() {
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
   const [step, setStep] = useState(1);
-  const [memberList, setMemberList] = useState<MemberList[]>([]);
+  const [memberList, setMemberList] = useState<ChatMembers[]>([]);
 
   return (
     <div className="relative">

@@ -9,6 +9,17 @@ export enum MessageType {
   ERROR = "ERROR",
 }
 
+export interface JWTPAYLOAD {
+  id: number;
+  email: string;
+  name: string;
+}
+
+export enum CHATTYPE {
+  "ONETOONE",
+  "GROUPCHAT",
+}
+
 const sendMessageDataSchema = z.object({
   message: z.string(),
   groupId: z.number(),
@@ -22,12 +33,12 @@ const createChatDataSchema = z
         userName: z.string(),
       })
     ),
-    chatType: z.enum(["oneToOne", "group"]),
+    chatType: z.nativeEnum(CHATTYPE),
     groupName: z.string().nullable(),
     createrId: z.number(),
   })
   .refine((data) => {
-    if (data.chatType === "oneToOne") {
+    if (data.chatType === CHATTYPE.ONETOONE) {
       return data.groupName === null;
     } else {
       return typeof data.groupName === "string";

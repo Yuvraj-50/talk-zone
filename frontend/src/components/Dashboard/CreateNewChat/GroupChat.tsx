@@ -3,17 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import Input from "../../../ui/Input";
 import axios from "axios";
-
-type User = {
-  name: string;
-  id: number;
-  email: string;
-};
-
-type memberList = {
-  userId: number;
-  userName: string;
-};
+import { ChatMembers, User } from "../../../types";
 
 type UserDate = {
   users: {
@@ -23,15 +13,10 @@ type UserDate = {
   }[];
 };
 
-type MemberList = {
-  userId: number;
-  userName: string;
-};
-
 interface GroupChatProps {
   changeStep: Dispatch<SetStateAction<number>>;
-  memberList: memberList[];
-  setMemberList: Dispatch<SetStateAction<memberList[]>>;
+  memberList: ChatMembers[];
+  setMemberList: Dispatch<SetStateAction<ChatMembers[]>>;
 }
 
 function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
@@ -39,7 +24,7 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
   const [search, setSearch] = useState<string>("");
 
   function handleAddMember(userId: number, userName: string) {
-    setMemberList((prev: memberList[]) => [...prev, { userId, userName }]);
+    setMemberList((prev: ChatMembers[]) => [...prev, { userId, userName }]);
   }
 
   function handleRemoveFromGroup(userId: number) {

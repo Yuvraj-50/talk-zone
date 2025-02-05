@@ -1,16 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-
-type AuthPayload = {
-  userId: number;
-  email: string;
-  name: string;
-};
+import jwt, { VerifyErrors } from "jsonwebtoken";
+import { JWTPAYLOAD } from "../types";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: AuthPayload;
+      user?: JWTPAYLOAD;
     }
   }
 }
@@ -21,18 +16,19 @@ export async function authMiddleWare(
   next: NextFunction
 ) {
   const token = req.cookies.jwt;
-  
+
   if (!token) return;
 
-  const user = jwt.verify(token, process.env.JWT_SECRET!);
-
-  if (typeof user == "string") {
-    return;
-  }
-
-  req.user = <AuthPayload>user;
-
-  console.log(req.user, "====");
-
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET!,
+    (err: VerifyErrors | null, user: unknown) => {
+      if (err) {
+        res.status(401).json({ msg: "not Authenticated user" });
+        return;
+      }
+      req.user = user as JWTPAYLOAD;
+    }
+  );
   next();
 }

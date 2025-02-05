@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { MessageType, UserSocketMessage } from "../types";
+import { CHATTYPE, MessageType, UserSocketMessage } from "../types";
 import prisma from "../utils/prismaClient";
 import { BaseMessageHandler, BaseMessageType } from "./BaseMessagehandler";
 import { Role } from "@prisma/client";
@@ -14,7 +14,7 @@ interface ChatMembers {
 interface CreateChatTye extends BaseMessageType {
   data: {
     members: ChatMembers[];
-    chatType: "oneToOne" | "group";
+    chatType: CHATTYPE;
     groupName: string | null;
     createrId: number;
   };
@@ -87,7 +87,7 @@ class CreateChatHandler extends BaseMessageHandler {
     createrId: number,
     name: null | string,
     chatMembers: ChatMembers[],
-    chatType: string
+    chatType: CHATTYPE
   ) {
     try {
       const createChat = await prisma.chats.create({
@@ -104,7 +104,7 @@ class CreateChatHandler extends BaseMessageHandler {
             chatId: createChat.id,
             userName: member.userName,
             role:
-              chatType === "group" && member.userId == createrId
+              chatType === CHATTYPE.GROUPCHAT && member.userId == createrId
                 ? "ADMIN"
                 : "MEMBER",
           },

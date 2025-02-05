@@ -13,6 +13,6 @@ router.get("/", authMiddleWare, GetChat);
 
 router.post("/create", authMiddleWare, CreateChat);
 
-router.get("/:id", GetChatMessages);
+router.get("/:id", authMiddleWare, GetChatMessages);
 
 export default router;

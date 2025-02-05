@@ -1,24 +1,12 @@
 import axios from "axios";
-
-enum Role {
-  "MEMBER",
-  "ADMIN",
-}
-
-type ChatMessage = {
-  message: string;
-  senderId: number;
-  sent_at: "string";
-  id: number;
-  chatId: number;
-  role: Role;
-  userId: number;
-  userName: string;
-};
+import { ChatMessage } from "../types";
 
 async function changeChat(chatId: number) {
   const messages = await axios.get<ChatMessage[]>(
-    `http://localhost:3000/api/v1/chat/${chatId}`
+    `http://localhost:3000/api/v1/chat/${chatId}`,
+    {
+      withCredentials: true,
+    }
   );
 
   return messages.data;

@@ -2,12 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "../zustand/authStore";
-
-interface User {
-  userId: number;
-  email: string;
-  name: string;
-}
+import { User } from "../types";
 
 interface AuthResponse {
   authenticated: boolean;
@@ -45,9 +40,9 @@ export const useAuth = () => {
 
         if (user) {
           updateAuth({
-            userName: user.name,
-            email: user.email,
-            userId: user.userId,
+            Username: user.name,
+            UserEmail: user.email,
+            UserId: user.id,
           });
         }
       } catch (err) {
