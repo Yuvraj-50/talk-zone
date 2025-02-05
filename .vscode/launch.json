@@ -1,0 +1,50 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Chat Backend in Debug Mode",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/backend/chat-service/dist/index.js", // Path to compiled JavaScript entry point for the chat microservice
+      "preLaunchTask": "tsc: watch (chat)", // Run `tsc -w` for the chat service before launching
+      "outFiles": [
+        "${workspaceFolder}/backend/chat-service/dist/**/*.js" // Sourcemaps for debugging
+      ],
+      "env": {
+        "NODE_ENV": "development", // Set your environment variable for dev mode if needed
+        "PORT": "3000"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "2 Chat backend",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/backend/chat-service/dist/index.js", // Path to compiled JavaScript entry point for the chat microservice
+      "preLaunchTask": "tsc: watch (2 chat)", // Run `tsc -w` for the chat service before launching
+      "outFiles": [
+        "${workspaceFolder}/backend/chat-service/dist/**/*.js" // Sourcemaps for debugging
+      ],
+      "env": {
+        "NODE_ENV": "development", // Set your environment variable for dev mode if needed
+        "PORT": "4000"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Auth Backend in Debug Mode",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/backend/auth-service/dist/index.js", // Path to compiled JavaScript entry point for the chat microservice
+      "preLaunchTask": "tsc: watch (auth)", // Run `tsc -w` for the chat service before launching
+      "outFiles": [
+        "${workspaceFolder}/backend/auth-service/dist/**/*.js" // Sourcemaps for debugging
+      ],
+      "env": {
+        "NODE_ENV": "development", // Set your environment variable for dev mode if needed
+        "PORT": "9000"
+      }
+    }
+  ]
+}

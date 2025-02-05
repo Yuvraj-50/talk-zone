@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "tsc: watch (chat)",
+      "type": "shell",
+      "command": "tsc -w", // Watch TypeScript files and compile them automatically
+      "options": {
+        "cwd": "${workspaceFolder}/backend/chat-service" // Run `tsc` in the chat microservice directory
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc-watch"],
+      "isBackground": true // Keeps the task running in the background
+    },
+    {
+      "label": "tsc: watch (2 chat)",
+      "type": "shell",
+      "command": "tsc -w", // Watch TypeScript files and compile them automatically
+      "options": {
+        "cwd": "${workspaceFolder}/backend/chat-service" // Run `tsc` in the chat microservice directory
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc-watch"],
+      "isBackground": true // Keeps the task running in the background
+    },
+    {
+      "label": "tsc: watch (auth)",
+      "type": "shell",
+      "command": "tsc -w", // Watch TypeScript files and compile them automatically
+      "options": {
+        "cwd": "${workspaceFolder}/backend/auth-service" // Run `tsc` in the auth microservice directory
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc-watch"],
+      "isBackground": true // Keeps the task running in the background
+    }
+  ]
+}

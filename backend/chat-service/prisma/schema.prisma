@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+ enum Role{
+  ADMIN
+  MEMBER
+}
+
+model Chats {
+  id          Int     @id @default(autoincrement())
+  name        String?
+  createdBy   Int
+  createdAt   DateTime @default(now())
+  chatmembers ChatMembers[]
+  messages    Messages[]
+  created_at  DateTime @default(now())
+} 
+
+model ChatMembers{
+  id          Int  @id @default(autoincrement())
+  role        Role @default(MEMBER)
+  chat        Chats @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId      Int 
+  userId      Int
+  userName    String
+  joined_at   DateTime @default(now())
+  @@unique([userId, chatId])
+}
+
+model Messages{
+  id          Int @id @default(autoincrement())
+  chat        Chats @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId      Int  
+  senderId    Int
+  message     String
+  sent_at     DateTime @default(now())
+}
