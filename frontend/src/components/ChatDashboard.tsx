@@ -11,7 +11,12 @@ import MessageInput from "./Dashboard/MessagingArea/MessageInput/MessageInput";
 import useActiveChatStore from "../zustand/activeChatStore";
 import changeChat from "../utils";
 import { useAuthStore } from "../zustand/authStore";
-import { ChatMessage, MessageType, UserConversation } from "../types";
+import {
+  ChatMessage,
+  MessageType,
+  UpdateOnlineStatus,
+  UserConversation,
+} from "../types";
 
 interface CreateChatPayload extends UserConversation {
   createdBy: number;
@@ -37,7 +42,7 @@ function ChatDashboard() {
     (state) => state.updateActiveChatName
   );
 
-  const { updateChat } = useChatStore();
+  const { updateChat, updateMemberOnlineStatus } = useChatStore();
 
   useEffect(() => {
     connect("ws://localhost:3000");
@@ -74,6 +79,14 @@ function ChatDashboard() {
           updateMessages(messages);
         }
         updateChat([...useChatStore.getState().chats, message]);
+      }
+    );
+
+    registerMessageHandler(
+      MessageType.ONLINE_STATUS,
+      (message: UpdateOnlineStatus) => {
+        // TODO THIS MAY CAUSE SOME BUG SO BE CARE FUL  
+        updateMemberOnlineStatus(message.userId, message.isOnline);
       }
     );
   }, [activeChatId, socket, chats]);

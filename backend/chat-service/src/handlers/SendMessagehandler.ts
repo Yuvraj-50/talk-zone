@@ -1,5 +1,3 @@
-import UserManager from "../managers/userManager";
-import RedisService from "../redis/pubsub";
 import { MessageType } from "../types";
 import prisma from "../utils/prismaClient";
 import { BaseMessageHandler, BaseMessageType } from "./BaseMessagehandler";

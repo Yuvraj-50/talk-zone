@@ -1,28 +1,21 @@
 import { createClient, RedisClientType } from "redis";
 
 class RedisService {
-  private static RedisInstance: RedisClientType | null = null;
   private static publisher: RedisClientType;
   private static subscriber: RedisClientType;
 
   private constructor() {}
 
   private static async initialize() {
-    if (!this.RedisInstance) {
-      this.publisher = createClient({ url: "redis://localhost:6379" });
-      this.subscriber = createClient({ url: "redis://localhost:6379" });
-
+    if (!this.publisher) {
+      this.publisher = createClient({ url: process.env.REDIS_URL });
       await this.publisher.connect();
-      await this.subscriber.connect();
-      this.RedisInstance = this.publisher;
     }
-  }
 
-  public static async getInstance() {
-    if (!this.RedisInstance) {
-      await this.initialize();
+    if (!this.subscriber) {
+      this.subscriber = createClient({ url: process.env.REDIS_URL });
+      await this.subscriber.connect();
     }
-    return this.RedisInstance;
   }
 
   public static async subscribe(

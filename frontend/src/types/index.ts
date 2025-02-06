@@ -30,11 +30,15 @@ export enum CHATTYPE {
   "GROUPCHAT",
 }
 
+interface UserConversationChatMembers extends ChatMembers {
+  isOnline: boolean;
+}
+
 export interface UserConversation {
   chatId: number;
   chatName: string;
   chatType: CHATTYPE;
-  chatMembers: ChatMembers[];
+  chatMembers: UserConversationChatMembers[];
 }
 
 export enum MessageType {
@@ -44,4 +48,9 @@ export enum MessageType {
   ONLINE_STATUS = "ONLINE_STATUS",
   AUTH_STATUS = "AUTH_STATUS",
   ERROR = "ERROR",
+}
+
+export interface UpdateOnlineStatus {
+  userId: number;
+  isOnline: boolean;
 }
