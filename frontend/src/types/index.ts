@@ -26,8 +26,8 @@ export interface ChatMembers {
 }
 
 export enum CHATTYPE {
-  "ONETOONE",
-  "GROUPCHAT",
+  "ONETOONE" = "ONETOONE",
+  "GROUPCHAT" = "GROUPCHAT",
 }
 
 interface UserConversationChatMembers extends ChatMembers {

@@ -70,28 +70,29 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
 
     console.log(chats, memberList);
 
-    const sorted = memberList.sort((a, b) =>
+    const sorted = [...memberList].sort((a, b) =>
       a.userName.toLowerCase().localeCompare(b.userName.toLowerCase())
     );
-
+    
     for (let i = 0; i < chats.length; i++) {
       console.log(chats[i]);
-
-      const sorteChat = chats[i].chatMembers.sort((a, b) =>
+    
+      const sortedChat = [...chats[i].chatMembers].sort((a, b) =>
         a.userName.toLowerCase().localeCompare(b.userName.toLowerCase())
       );
-
-      if (sorted.length != sorteChat.length) continue;
-
+    
+      if (sorted.length !== sortedChat.length) continue;
+    
       if (
-        sorted[0].userId == sorteChat[0].userId &&
-        sorted[1].userId == sorteChat[1].userId
+        sorted[0].userId === sortedChat[0].userId &&
+        sorted[1].userId === sortedChat[1].userId
       ) {
-        console.log("A chat already exits");
-        console.log(sorted, sorteChat, chats);
+        console.log("A chat already exists");
+        console.log(sorted, sortedChat, chats);
         return;
       }
     }
+    
 
     // const response = await axios.post<createChatData>(
     //   "http://localhost:3000/api/v1/chat/create",

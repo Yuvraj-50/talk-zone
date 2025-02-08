@@ -25,9 +25,11 @@ class MessageManager {
   async handleMessage(message: string, userId: number) {
     try {
       const payload = JSON.parse(message);
-      const { success, data } = UserSocketMessageSchema.safeParse(payload);
+      const { success, data, error } =
+        UserSocketMessageSchema.safeParse(payload);
 
       if (!success) {
+        console.log(error);
         console.log("incorrect Inputs");
         console.log(data);
         return;

@@ -16,8 +16,8 @@ export interface JWTPAYLOAD {
 }
 
 export enum CHATTYPE {
-  "ONETOONE",
-  "GROUPCHAT",
+  "ONETOONE" = "ONETOONE",
+  "GROUPCHAT" = "GROUPCHAT",
 }
 
 const sendMessageDataSchema = z.object({

@@ -82,11 +82,16 @@ function ChatDashboard() {
       }
     );
 
+    console.log(chats);
+
     registerMessageHandler(
       MessageType.ONLINE_STATUS,
       (message: UpdateOnlineStatus) => {
-        // TODO THIS MAY CAUSE SOME BUG SO BE CARE FUL  
+        // TODO THIS MAY CAUSE SOME BUG SO BE CARE FUL
+        console.log(message);
+
         updateMemberOnlineStatus(message.userId, message.isOnline);
+        // THIS DOES NOT CAUSED ANY BUGS OKAY
       }
     );
   }, [activeChatId, socket, chats]);

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../utils/prismaClient";
 import { Role } from "@prisma/client";
 import { CHATTYPE } from "../types";
+import RedisStore from "../redis/redisStore";
 
 interface Message {
   id: number;
@@ -13,6 +14,20 @@ interface Message {
   userId: number;
   userName: string;
 }
+
+type createChatData = {
+  chatId: number;
+  chatName: string;
+  chatType: CHATTYPE;
+  createdBy: number;
+  chatMembers: {
+    userId: number;
+    userName: string;
+    role: Role;
+    joined_at: Date;
+    isOnline: boolean;
+  }[];
+};
 
 export async function CreateChat(req: Request, res: Response) {
   const loggedInUserId = req.user?.id;
@@ -107,8 +122,6 @@ export async function CreateChat(req: Request, res: Response) {
 export async function GetChat(req: Request, res: Response) {
   const loggedInUserId = req.user?.id;
 
-  console.log(loggedInUserId);
-
   try {
     const chatMemberships = await prisma.chatMembers.findMany({
       where: {
@@ -125,6 +138,8 @@ export async function GetChat(req: Request, res: Response) {
               select: {
                 userId: true,
                 userName: true,
+                role: true,
+                joined_at: true,
               },
             },
           },
@@ -132,41 +147,49 @@ export async function GetChat(req: Request, res: Response) {
       },
     });
 
-    type createChatData = {
-      chatId: number;
-      chatName: string;
-      chatType: CHATTYPE;
-      chatMembers: {
-        userId: number;
-        userName: string;
-      }[];
-    };
+    const formattedChats: createChatData[] = [];
 
-    const formattedChats: createChatData[] = chatMemberships.map(
-      (membership) => {
-        const { chat } = membership;
+    for (const membership of chatMemberships) {
+      const { chat } = membership;
+      const otherMember = chat.chatmembers.find(
+        (member) => member.userId !== loggedInUserId
+      );
 
-        if (chat.name !== null) {
-          return {
-            chatId: membership.chatId,
-            chatName: chat.name,
-            chatMembers: membership.chat.chatmembers,
-            chatType: CHATTYPE.GROUPCHAT,
-          };
-        } else {
-          const otherMember = chat.chatmembers.find(
-            (member) => member.userId !== loggedInUserId
-          );
+      const chatmemeberswithstatus = await RedisStore.getMemberStatus(
+        chat.chatmembers
+      );
 
-          return {
-            chatId: membership.chatId,
-            chatName: otherMember?.userName || "Unknown User",
-            chatMembers: membership.chat.chatmembers,
-            chatType: CHATTYPE.ONETOONE,
-          };
-        }
-      }
-    );
+      formattedChats.push({
+        chatId: membership.chatId,
+        chatName: chat.name ?? otherMember?.userName ?? "unknown chat",
+        chatMembers: chatmemeberswithstatus,
+        chatType: chat.name ? CHATTYPE.GROUPCHAT : CHATTYPE.ONETOONE,
+        createdBy: chat.createdBy,
+      });
+    }
+
+    // const formattedChats: createChatData[] = chatMemberships.map(
+    // async (membership) => {
+    // if (chat.name !== null) {
+    //   return {
+    //     chatId: membership.chatId,
+    //     chatName: chat.name,
+    //     chatMembers: membership.chat.chatmembers,
+    //     chatType: CHATTYPE.GROUPCHAT,
+    //   };
+    // } else {
+    //   const otherMember = chat.chatmembers.find(
+    //     (member) => member.userId !== loggedInUserId
+    //   );
+    //   return {
+    //     chatId: membership.chatId,
+    //     chatName: otherMember?.userName || "Unknown User",
+    //     chatMembers: membership.chat.chatmembers,
+    //     chatType: CHATTYPE.ONETOONE,
+    //   };
+    // }
+    // }
+    // );
     res.json(formattedChats);
   } catch (error) {
     res.status(404).json({ msg: "Internal server errror", error });

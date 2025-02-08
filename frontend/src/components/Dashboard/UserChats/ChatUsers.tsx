@@ -4,6 +4,7 @@ import { memo } from "react";
 import useActiveChatStore from "../../../zustand/activeChatStore";
 import ChatMessage from "./ChatMessage";
 import changeChat from "../../../utils";
+import { CHATTYPE } from "../../../types";
 
 function ChatUsers({
   setMessageLoading,
@@ -33,6 +34,9 @@ function ChatUsers({
     setMessageLoading(false);
   }
 
+  console.log(chats);
+  
+
   return (
     <div className="mb-2 bg-slate-400">
       {chats.map((chat) => (
@@ -43,6 +47,14 @@ function ChatUsers({
           }`}
           onClick={() => handleChangeChat(chat.chatId, chat.chatName)}
         >
+          {chat.chatType == CHATTYPE.ONETOONE && (
+            <div>
+              online{" "}
+              {chat.chatMembers.every((member) => member.isOnline == true)
+                ? "true"
+                : "false"}
+            </div>
+          )}
           <ChatMessage
             key={chat.chatId}
             chatName={chat.chatName}

@@ -2,7 +2,7 @@ import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
 import Input from "../../../ui/Input";
 import { useAuthStore } from "../../../zustand/authStore";
 import useWebSocketStore from "../../../zustand/socketStore";
-import { ChatMembers, MessageType } from "../../../types";
+import { ChatMembers, CHATTYPE, MessageType } from "../../../types";
 
 interface GroupDetailsProps {
   memberList: ChatMembers[];
@@ -16,7 +16,7 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
 
   async function handleCreateGroup() {
     if (myUserId && userName) {
-      memberList.push({ userName, userId: myUserId });
+      memberList.push({ userId: myUserId, userName });
     }
 
     // const response = await axios.post<createChatData>(
@@ -51,7 +51,7 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
         type: MessageType.CREATE_CHAT,
         data: {
           members: memberList,
-          chatType: "group",
+          chatType: CHATTYPE.GROUPCHAT,
           groupName: groupName,
           createrId: myUserId,
         },

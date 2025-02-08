@@ -3,6 +3,7 @@ import { CHATTYPE, MessageType, UserSocketMessage } from "../types";
 import prisma from "../utils/prismaClient";
 import { BaseMessageHandler, BaseMessageType } from "./BaseMessagehandler";
 import { Role } from "@prisma/client";
+import RedisStore from "../redis/redisStore";
 
 interface ChatMembers {
   userId: number;
@@ -20,21 +21,27 @@ interface CreateChatTye extends BaseMessageType {
   };
 }
 
+interface ClientPayloadChatMembers extends ChatMembers {
+  isOnline: boolean;
+}
+
 interface ClientResPayload {
-  type: string;
+  type: MessageType;
   data: {
     message: string;
     chatId: number;
-    members: ChatMembers[];
+    chatMembers: ClientPayloadChatMembers[];
     chatName: string | null;
     createdBy: number | null;
+    chatType: CHATTYPE;
   };
 }
 
 class CreateChatHandler extends BaseMessageHandler {
   async handle(payload: CreateChatTye, userId: number): Promise<void> {
-    const type = payload.type;
+    const type = payload.type as MessageType;
     const chatdata = payload.data;
+
     const createdChat = await this.createChat(
       chatdata.createrId,
       chatdata.groupName,
@@ -44,11 +51,17 @@ class CreateChatHandler extends BaseMessageHandler {
 
     if (!createdChat) return;
 
+    const memberWithStatus = await RedisStore.getMemberStatus(chatdata.members);
+
     const respayload = {
       type,
       data: {
-        ...createdChat,
+        chatId: createdChat.chatId,
+        chatMembers: memberWithStatus,
+        chatName: createdChat.chatName,
+        createdBy: createdChat.createdBy,
         message: "Chat created successfully",
+        chatType: chatdata.chatType,
       },
     };
 
@@ -58,10 +71,10 @@ class CreateChatHandler extends BaseMessageHandler {
   async sendChatToChatMembers(resPayload: ClientResPayload) {
     const { data } = resPayload;
 
-    data.members.forEach((member) => {
+    data.chatMembers.forEach((member) => {
       const chatName = data.chatName
         ? data.chatName
-        : this.createOneToOneChatName(data.members, member.userId);
+        : this.createOneToOneChatName(data.chatMembers, member.userId);
 
       const personalizedPayload = {
         ...resPayload,

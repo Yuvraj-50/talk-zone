@@ -60,7 +60,7 @@ class UserManager {
         };
 
         const memberSocket = this.users.get(memberId);
-        
+
         if (memberSocket) {
           memberSocket.send(JSON.stringify(payload));
         } else {
