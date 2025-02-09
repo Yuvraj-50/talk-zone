@@ -2,15 +2,22 @@ import { create } from "zustand";
 import { UserConversation } from "../types";
 import { immer } from "zustand/middleware/immer";
 
-type Chats = {
+interface Chats {
   chats: UserConversation[];
+  typingUsers: Record<number, string[]>;
+}
+
+interface ChatsAction {
   updateChat: (chats: UserConversation[]) => void;
   updateMemberOnlineStatus: (id: number, status: boolean) => void;
-};
+  setTypingUser: (chatId: number, userName: string) => void;
+  removeTypingUser: (chatId: number, userName: string) => void;
+}
 
-export const useChatStore = create<Chats>()(
+export const useChatStore = create<Chats & ChatsAction>()(
   immer((set) => ({
     chats: [],
+    typingUsers: {},
 
     updateChat: (chat: UserConversation[]) =>
       set((state) => {
@@ -21,11 +28,31 @@ export const useChatStore = create<Chats>()(
       set((state) => {
         state.chats.forEach((chat) => {
           chat.chatMembers.forEach((member) => {
-            if (member.userId == id) {
+            if (member.userId === id) {
               member.isOnline = status;
             }
           });
         });
+      }),
+
+    setTypingUser: (chatId: number, userName: string) =>
+      set((state) => {
+        const prevTyping = new Set(state.typingUsers[chatId] || []);
+        prevTyping.add(userName);
+        state.typingUsers[chatId] = [...prevTyping];
+      }),
+
+    removeTypingUser: (chatId: number, userName: string) =>
+      set((state) => {
+        const filtered = (state.typingUsers[chatId] || []).filter(
+          (user) => user !== userName
+        );
+
+        if (filtered.length) {
+          state.typingUsers[chatId] = filtered;
+        } else {
+          delete state.typingUsers[chatId];
+        }
       }),
   }))
 );

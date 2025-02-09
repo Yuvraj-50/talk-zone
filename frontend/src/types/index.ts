@@ -54,3 +54,9 @@ export interface UpdateOnlineStatus {
   userId: number;
   isOnline: boolean;
 }
+
+export interface TypingIndicator {
+  userName: string;
+  chatId: number;
+  isTyping: boolean;
+}

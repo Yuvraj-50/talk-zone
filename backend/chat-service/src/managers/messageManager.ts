@@ -3,6 +3,7 @@ import { BaseMessageHandler } from "../handlers/BaseMessagehandler";
 import { SendMessageHandler } from "../handlers/SendMessagehandler";
 import { MessageType, UserSocketMessageSchema } from "../types";
 import CreateChatHandler from "../handlers/CreateChathandler";
+import TypingIndicatorHandler from "../handlers/TypingIndicatorhandler";
 
 class MessageManager {
   private static instance: MessageManager | null = null;
@@ -12,6 +13,7 @@ class MessageManager {
     this.handlers = new Map();
     this.handlers.set(MessageType.SEND_MESSAGE, new SendMessageHandler());
     this.handlers.set(MessageType.CREATE_CHAT, new CreateChatHandler());
+    this.handlers.set(MessageType.TYPING, new TypingIndicatorHandler());
   }
 
   static getInstance(): MessageManager {

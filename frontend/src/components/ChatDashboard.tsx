@@ -14,6 +14,7 @@ import { useAuthStore } from "../zustand/authStore";
 import {
   ChatMessage,
   MessageType,
+  TypingIndicator,
   UpdateOnlineStatus,
   UserConversation,
 } from "../types";
@@ -30,6 +31,7 @@ function ChatDashboard() {
   const chats = useChatStore((state) => state.chats);
   const { updateMessages } = useMessagesStore();
   const userId = useAuthStore((state) => state.UserId);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
 
   const { socket, connect, disconnect, registerMessageHandler } =
     useWebSocketStore();
@@ -42,7 +44,13 @@ function ChatDashboard() {
     (state) => state.updateActiveChatName
   );
 
-  const { updateChat, updateMemberOnlineStatus } = useChatStore();
+  const {
+    updateChat,
+    updateMemberOnlineStatus,
+    setTypingUser,
+    removeTypingUser,
+  } = useChatStore();
+  4;
 
   useEffect(() => {
     connect("ws://localhost:3000");
@@ -82,18 +90,27 @@ function ChatDashboard() {
       }
     );
 
-    console.log(chats);
+    // console.log(chats);
 
     registerMessageHandler(
       MessageType.ONLINE_STATUS,
       (message: UpdateOnlineStatus) => {
         // TODO THIS MAY CAUSE SOME BUG SO BE CARE FUL
-        console.log(message);
+        // console.log(message);
 
         updateMemberOnlineStatus(message.userId, message.isOnline);
         // THIS DOES NOT CAUSED ANY BUGS OKAY
       }
     );
+
+    registerMessageHandler(MessageType.TYPING, (message: TypingIndicator) => {
+      
+      if (message.isTyping == true) {
+        setTypingUser(message.chatId, message.userName);
+      } else {
+        removeTypingUser(message.chatId, message.userName);
+      }
+    });
   }, [activeChatId, socket, chats]);
 
   useEffect(() => {
@@ -134,10 +151,10 @@ function ChatDashboard() {
       <div className="bg-slate-600 overflow-auto grid grid-rows-[30px_auto_60px]">
         <div className="bg-white h-20px">{activeChatName}</div>
         <div className="overflow-y-auto">
-          <MessageArea messageLoading={messageLoading} />
+          <MessageArea messageLoading={messageLoading} isTyping={isTyping} />
         </div>
         <div className="p-2">
-          <MessageInput />
+          <MessageInput setIsTyping={setIsTyping} />
         </div>
       </div>
     </div>

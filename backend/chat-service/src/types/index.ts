@@ -45,6 +45,12 @@ const createChatDataSchema = z
     }
   });
 
+const typingIndicatorSchema = z.object({
+  userName: z.string(),
+  chatId: z.number(),
+  isTyping: z.boolean(),
+});
+
 export const UserSocketMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(MessageType.SEND_MESSAGE),
@@ -54,6 +60,11 @@ export const UserSocketMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(MessageType.CREATE_CHAT),
     data: createChatDataSchema,
+  }),
+
+  z.object({
+    type: z.literal(MessageType.TYPING),
+    data: typingIndicatorSchema,
   }),
 ]);
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactElement, Ref } from "react";
 
 interface InputProps {
   label?: string;
@@ -8,6 +8,7 @@ interface InputProps {
   type?: string;
   error?: string;
   className?: string;
+  ref?: React.RefObject<HTMLInputElement>;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -18,6 +19,7 @@ const Input: React.FC<InputProps> = ({
   type = "text",
   error,
   className,
+  ref
 }) => {
   const defaultClass = `w-full px-4 py-2 border  focus:outline-none focus:ring-2 ${
     error
@@ -47,6 +49,7 @@ const Input: React.FC<InputProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         className={processedClasses}
+        ref={ref}
       />
 
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}

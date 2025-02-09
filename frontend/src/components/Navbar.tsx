@@ -1,8 +1,10 @@
 import axios from "axios";
 import { useAuthStore } from "../zustand/authStore";
+import useWebSocketStore from "../zustand/socketStore";
 
 function Navbar() {
-  const {  UserId, Username } = useAuthStore();
+  const { UserId, Username } = useAuthStore();
+  const { disconnect } = useWebSocketStore();
 
   async function handleLogout() {
     const response = await axios.get(
@@ -11,7 +13,7 @@ function Navbar() {
         withCredentials: true,
       }
     );
-
+    disconnect();
     console.log(response);
   }
   return (

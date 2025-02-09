@@ -45,7 +45,6 @@ wss.on("connection", async (ws: WebSocket, req: Request) => {
 
   ws.on("message", async (msg, isBinary) => {
     if (isBinary && (msg as any)[0] == HEARTBEAT_VALUE) {
-      console.log("pong from client");
       ws.isAlive = true;
     } else {
       MessageManager.getInstance().handleMessage(msg.toString(), userDetail.id);

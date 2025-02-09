@@ -34,7 +34,7 @@ function ChatUsers({
     setMessageLoading(false);
   }
 
-  console.log(chats);
+  // console.log(chats);
   
 
   return (

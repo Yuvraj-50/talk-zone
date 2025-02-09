@@ -19,7 +19,7 @@ interface WebSocketAction {
   registerMessageHandler: (type: string, handler: (data: any) => void) => void;
 }
 
-const HEARTBEAT_TIMEOUT = 1000 * 20 + (2 * 1000);
+const HEARTBEAT_TIMEOUT = 1000 * 20 + 2 * 1000;
 const RECONNECT_DELAY = 1000 * 5; // 5 seconds
 
 function isBinary(obj: any) {
@@ -74,7 +74,6 @@ const useWebSocketStore = create<WebSocketState & WebSocketAction>(
         ws.onopen = () => {
           console.log("connection successful");
           set({ socket: ws });
-          console.log("this is calling multiple onopen");
         };
 
         ws.onclose = () => {
@@ -94,7 +93,6 @@ const useWebSocketStore = create<WebSocketState & WebSocketAction>(
         };
 
         ws.onmessage = (event) => {
-          console.log("this is calling multiple onMessage");
           if (isBinary(event.data)) {
             heartBeat(ws);
           } else {
