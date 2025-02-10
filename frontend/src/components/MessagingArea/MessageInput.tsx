@@ -1,9 +1,9 @@
 import { SetStateAction, useEffect, useRef, useState } from "react";
-import Input from "../../../../ui/Input";
-import useWebSocketStore from "../../../../zustand/socketStore";
-import useActiveChatStore from "../../../../zustand/activeChatStore";
-import { MessageType } from "../../../../types";
-import { useAuthStore } from "../../../../zustand/authStore";
+import Input from "../../ui/Input";
+import useWebSocketStore from "../../zustand/socketStore";
+import useActiveChatStore from "../../zustand/activeChatStore";
+import { MessageType } from "../../types";
+import { useAuthStore } from "../../zustand/authStore";
 
 interface MessageInputProps {
   setIsTyping: React.Dispatch<SetStateAction<boolean>>;
@@ -32,7 +32,7 @@ function MessageInput({ setIsTyping }: MessageInputProps) {
       type: MessageType.TYPING,
       data: {
         chatId: activechatId,
-        isTyping: false, 
+        isTyping: false,
         userName,
       },
     };
@@ -77,28 +77,28 @@ function MessageInput({ setIsTyping }: MessageInputProps) {
         };
 
         sendMessage(stopTypingPayload);
-        isTypingSent.current = false; // Reset typing flag
+        isTypingSent.current = false; 
       }, 1000);
 
-      return () => clearTimeout(timer); // Cleanup timer
+      return () => clearTimeout(timer); 
     } else {
       const stopTypingPayload = {
         type: MessageType.TYPING,
         data: {
           chatId: activechatId,
           userName,
-          isTyping: false, // Consistent property name
+          isTyping: false, 
         },
       };
 
       sendMessage(stopTypingPayload);
-      isTypingSent.current = false; // Reset typing flag
+      isTypingSent.current = false; 
     }
   }, [inputValue, activechatId, sendMessage, userName]);
 
   return (
     <>
-      <form className="w-full relative" onSubmit={handleFormSubmit}>
+      <form className="relative" onSubmit={handleFormSubmit}>
         <Input
           value={inputValue}
           onChange={handleInputTyping}

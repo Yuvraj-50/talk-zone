@@ -16,14 +16,17 @@ function Navbar() {
     disconnect();
     console.log(response);
   }
+
   return (
-    <div className="flex justify-between p-3 bg-purple-400">
-      <div className="flex gap-2">
-        <h1>{Username}</h1>
-        <h1>{UserId}</h1>
-        <h1>{Username}</h1>
+    <div className="flex items-center justify-between px-6 py-3 bg-[#1A1A1A] border-b border-gray-800">
+      <div className="flex items-center gap-4">
+        <h1 className="text-lg font-medium text-white">{Username}</h1>
+        <span className="text-sm text-gray-400">ID: {UserId}</span>
       </div>
-      <button className="border border-green-300" onClick={handleLogout}>
+      <button
+        onClick={handleLogout}
+        className="px-4 py-2 text-sm font-medium text-gray-200 transition-colors rounded-lg bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600"
+      >
         Logout
       </button>
     </div>

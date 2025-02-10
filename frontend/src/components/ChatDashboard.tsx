@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
-import CreateChat from "./Dashboard/CreateNewChat/CreateChat";
-import ChatUsers from "./Dashboard/UserChats/ChatUsers";
+import CreateChat from "./sidebar/CreateNewChat/CreateChat";
+import ChatUsers from "./sidebar/UserChats/ChatUsers";
 import { useMessagesStore } from "../zustand/messageStore";
-import MessageArea from "./Dashboard/MessagingArea/MessageArea";
-import axios from "axios";
+import MessageArea from "./MessagingArea/MessageArea";
 import { useChatStore } from "../zustand/ChatsStore";
 import useWebSocketStore from "../zustand/socketStore";
-import MessageInput from "./Dashboard/MessagingArea/MessageInput/MessageInput";
+import MessageInput from "./MessagingArea/MessageInput";
 import useActiveChatStore from "../zustand/activeChatStore";
 import changeChat from "../utils";
 import { useAuthStore } from "../zustand/authStore";
@@ -25,24 +24,16 @@ interface CreateChatPayload extends UserConversation {
 
 function ChatDashboard() {
   const [messageLoading, setMessageLoading] = useState<boolean>(false);
-  const [dashboardLoading, setDashboardLoading] = useState<boolean>(true);
-  const activeChatId = useActiveChatStore((state) => state.activechatId);
-  const activeChatName = useActiveChatStore((state) => state.activeChatName);
   const chats = useChatStore((state) => state.chats);
   const { updateMessages } = useMessagesStore();
   const userId = useAuthStore((state) => state.UserId);
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
-  const { socket, connect, disconnect, registerMessageHandler } =
+  const { socket, registerMessageHandler, connect, disconnect } =
     useWebSocketStore();
 
-  const updateActiveChatId = useActiveChatStore(
-    (state) => state.updateActiveChatId
-  );
-
-  const updateActiveChatName = useActiveChatStore(
-    (state) => state.updateActiveChatName
-  );
+  const { updateActiveChatId, updateActiveChatName, activechatId } =
+    useActiveChatStore();
 
   const {
     updateChat,
@@ -50,7 +41,8 @@ function ChatDashboard() {
     setTypingUser,
     removeTypingUser,
   } = useChatStore();
-  4;
+
+  // Your existing useEffect code remains the same
 
   useEffect(() => {
     connect("ws://localhost:3000");
@@ -61,7 +53,7 @@ function ChatDashboard() {
 
   useEffect(() => {
     registerMessageHandler(MessageType.SEND_MESSAGE, (message: ChatMessage) => {
-      if (message.chatId === activeChatId) {
+      if (message.chatId === activechatId) {
         useMessagesStore.getState().appendMessage(message);
       }
 
@@ -90,71 +82,48 @@ function ChatDashboard() {
       }
     );
 
-    // console.log(chats);
-
     registerMessageHandler(
       MessageType.ONLINE_STATUS,
       (message: UpdateOnlineStatus) => {
-        // TODO THIS MAY CAUSE SOME BUG SO BE CARE FUL
-        // console.log(message);
-
         updateMemberOnlineStatus(message.userId, message.isOnline);
-        // THIS DOES NOT CAUSED ANY BUGS OKAY
       }
     );
 
     registerMessageHandler(MessageType.TYPING, (message: TypingIndicator) => {
-      
       if (message.isTyping == true) {
         setTypingUser(message.chatId, message.userName);
       } else {
         removeTypingUser(message.chatId, message.userName);
       }
     });
-  }, [activeChatId, socket, chats]);
-
-  useEffect(() => {
-    async function getAllChats() {
-      try {
-        const response = await axios.get<UserConversation[]>(
-          "http://localhost:3000/api/v1/chat",
-          {
-            withCredentials: true,
-          }
-        );
-
-        updateChat(response.data);
-      } catch (error) {
-        console.error("Failed to fetch chats", error);
-      } finally {
-        setDashboardLoading(false);
-      }
-    }
-
-    getAllChats();
-  }, []);
+  }, [activechatId, socket, chats]);
 
   return (
-    <div className="grid grid-rows-[50px_auto] grid-cols-[30%_auto] bg-green-300 h-screen">
-      <div className="col-span-2">
+    <div className="h-screen flex flex-col bg-[#121212] text-white">
+      <div className="h-14 min-h-[56px] bg-[#1E1E1E] shadow-md">
         <Navbar />
       </div>
 
-      <div className="bg-red-400">
-        <div className="flex justify-between items-center">
-          <h1>Chats</h1>
-          <CreateChat />
+      <div className="flex-1 flex overflow-hidden">
+        <div className=" bg-[#1E1E1E] border-r border-gray-700 flex flex-col">
+          <div className="p-4 border-b border-gray-700">
+            <div className="flex justify-between items-center">
+              <h1 className="text-lg font-semibold">Chats</h1>
+              <CreateChat />
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <ChatUsers setMessageLoading={setMessageLoading} />
+          </div>
         </div>
-        <ChatUsers setMessageLoading={setMessageLoading} />
-      </div>
 
-      <div className="bg-slate-600 overflow-auto grid grid-rows-[30px_auto_60px]">
-        <div className="bg-white h-20px">{activeChatName}</div>
-        <div className="overflow-y-auto">
-          <MessageArea messageLoading={messageLoading} isTyping={isTyping} />
-        </div>
-        <div className="p-2">
-          <MessageInput setIsTyping={setIsTyping} />
+        <div className="flex-1 bg-[#1E1E1E] flex flex-col mb-2 h-full">
+          <div className="flex-1 overflow-y-auto">
+            <MessageArea messageLoading={messageLoading} isTyping={isTyping} />
+          </div>
+          <div className="border-t border-gray-700">
+            <MessageInput setIsTyping={setIsTyping} />
+          </div>
         </div>
       </div>
     </div>

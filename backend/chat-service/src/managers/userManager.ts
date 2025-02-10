@@ -40,7 +40,7 @@ class UserManager {
 
   async notifyChatMembers(userId: number, isOnline: boolean) {
     const userChats = await this.getChatMembers(userId);
-
+    if (!userChats) return;
     const memeberset = new Set<number>();
 
     for (const { chat } of userChats) {
@@ -74,13 +74,17 @@ class UserManager {
   }
 
   async getChatMembers(userId: number) {
-    const chatMembers = await prisma.chatMembers.findMany({
-      where: { userId: userId },
-      include: {
-        chat: { include: { chatmembers: true } },
-      },
-    });
-    return chatMembers;
+    try {
+      const chatMembers = await prisma.chatMembers.findMany({
+        where: { userId: userId },
+        include: {
+          chat: { include: { chatmembers: true } },
+        },
+      });
+      return chatMembers;
+    } catch (error) {
+      console.log("error");
+    }
   }
 
   async subscribeToRedis(channelName: string, ws: WebSocket): Promise<void> {

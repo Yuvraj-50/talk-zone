@@ -1,4 +1,4 @@
-import React, { ReactElement, Ref } from "react";
+import React from "react";
 
 interface InputProps {
   label?: string;
@@ -19,13 +19,13 @@ const Input: React.FC<InputProps> = ({
   type = "text",
   error,
   className,
-  ref
+  ref,
 }) => {
-  const defaultClass = `w-full px-4 py-2 border  focus:outline-none focus:ring-2 ${
+  const defaultClass = `w-full px-4 py-2 border rounded-lg bg-[#1f1f1f] text-white focus:outline-none focus:ring-2 ${
     error
-      ? "border-red-500 focus:ring-red-300"
-      : "border-gray-300 focus:ring-blue-300"
-  }`;
+      ? "border-red-500 focus:ring-red-500"
+      : "border-gray-700 focus:ring-blue-500"
+  } transition-all duration-200 ease-in-out`;
 
   const processedClasses = className
     ? defaultClass + " " + className
@@ -36,7 +36,7 @@ const Input: React.FC<InputProps> = ({
       {label && (
         <label
           htmlFor={label}
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-400 mb-1"
         >
           {label}
         </label>
