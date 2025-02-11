@@ -23,6 +23,7 @@ export interface ChatMessage {
 export interface ChatMembers {
   userId: number;
   userName: string;
+  userEmail: string;
 }
 
 export enum CHATTYPE {

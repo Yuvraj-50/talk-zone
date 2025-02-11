@@ -29,95 +29,96 @@ type createChatData = {
   }[];
 };
 
-export async function CreateChat(req: Request, res: Response) {
-  const loggedInUserId = req.user?.id;
+// export async function CreateChat(req: Request, res: Response) {
+//   const loggedInUserId = req.user?.id;
 
-  const { members, chatType, groupName, createrId } = req.body;
+//   const { members, chatType, groupName, createrId } = req.body;
 
-  if (!Array.isArray(members) || members.length === 0) {
-    res
-      .status(400)
-      .json({ error: "Members list is required and should be an array." });
-    return;
-  }
+//   if (!Array.isArray(members) || members.length === 0) {
+//     res
+//       .status(400)
+//       .json({ error: "Members list is required and should be an array." });
+//     return;
+//   }
 
-  if (chatType !== CHATTYPE.ONETOONE && chatType !== CHATTYPE.GROUPCHAT) {
-    res
-      .status(400)
-      .json({ error: "Invalid chat type. Must be 'group' or 'oneToOne'." });
-    return;
-  }
+//   if (chatType !== CHATTYPE.ONETOONE && chatType !== CHATTYPE.GROUPCHAT) {
+//     res
+//       .status(400)
+//       .json({ error: "Invalid chat type. Must be 'group' or 'oneToOne'." });
+//     return;
+//   }
 
-  if (chatType === CHATTYPE.GROUPCHAT && (!groupName || !createrId)) {
-    res.status(400).json({
-      error: "Group name and creator ID are required for group chats.",
-    });
-    return;
-  }
+//   if (chatType === CHATTYPE.GROUPCHAT && (!groupName || !createrId)) {
+//     res.status(400).json({
+//       error: "Group name and creator ID are required for group chats.",
+//     });
+//     return;
+//   }
 
-  try {
-    const chatData = await prisma.chats.create({
-      data:
-        chatType === "group"
-          ? { name: groupName, createdBy: createrId }
-          : { createdBy: createrId },
-    });
+//   try {
+//     const chatData = await prisma.chats.create({
+//       data:
+//         chatType === "group"
+//           ? { name: groupName, createdBy: createrId }
+//           : { createdBy: createrId },
+//     });
 
-    const memberPromises = members.map(
-      (member: { userId: number; userEmail: string }) => {
-        return prisma.chatMembers.create({
-          data: {
-            userId: member.userId,
-            chatId: chatData.id,
-            userName: member.userEmail,
-            role:
-              chatType === "group" && member === createrId ? "ADMIN" : "MEMBER",
-          },
-          select: {
-            userName: true,
-            userId: true,
-          },
-        });
-      }
-    );
-    // TODO SEND CHATMEMBERS ALSO
-    const chatMembers = await Promise.all(memberPromises);
+//     const memberPromises = members.map(
+//       (member: { userId: number; userEmail: string }) => {
+//         return prisma.chatMembers.create({
+//           data: {
+//             userId: member.userId,
+//             chatId: chatData.id,
+//             userName: member.userEmail,
+//             userEmail: member.userEmail,
+//             role:
+//               chatType === "group" && member === createrId ? "ADMIN" : "MEMBER",
+//           },
+//           select: {
+//             userName: true,
+//             userId: true,
+//           },
+//         });
+//       }
+//     );
+//     // TODO SEND CHATMEMBERS ALSO
+//     const chatMembers = await Promise.all(memberPromises);
 
-    if (chatType == CHATTYPE.GROUPCHAT) {
-      res.status(201).json({
-        message: "Chat created successfully",
-        chatId: chatData.id,
-        chatName: chatData.name,
-        chatType,
-        chatMembers,
-      });
-      return;
-    }
+//     if (chatType == CHATTYPE.GROUPCHAT) {
+//       res.status(201).json({
+//         message: "Chat created successfully",
+//         chatId: chatData.id,
+//         chatName: chatData.name,
+//         chatType,
+//         chatMembers,
+//       });
+//       return;
+//     }
 
-    const chatName = chatMembers.filter((member) => {
-      if (member.userId != loggedInUserId) {
-        console.log(member.userId, loggedInUserId);
+//     const chatName = chatMembers.filter((member) => {
+//       if (member.userId != loggedInUserId) {
+//         console.log(member.userId, loggedInUserId);
 
-        return member;
-      }
-    });
+//         return member;
+//       }
+//     });
 
-    console.log(chatMembers, chatName, req.user);
+//     console.log(chatMembers, chatName, req.user);
 
-    res.status(201).json({
-      message: "Chat created successfully",
-      chatId: chatData.id,
-      chatName: chatName[0].userName,
-      chatType,
-      chatMembers,
-    });
-  } catch (error) {
-    console.error("Error creating chat:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while creating the chat." });
-  }
-}
+//     res.status(201).json({
+//       message: "Chat created successfully",
+//       chatId: chatData.id,
+//       chatName: chatName[0].userName,
+//       chatType,
+//       chatMembers,
+//     });
+//   } catch (error) {
+//     console.error("Error creating chat:", error);
+//     res
+//       .status(500)
+//       .json({ error: "An error occurred while creating the chat." });
+//   }
+// }
 
 export async function GetChat(req: Request, res: Response) {
   const loggedInUserId = req.user?.id;
@@ -140,6 +141,7 @@ export async function GetChat(req: Request, res: Response) {
                 userName: true,
                 role: true,
                 joined_at: true,
+                userEmail: true,
               },
             },
           },

@@ -11,12 +11,16 @@ interface GroupDetailsProps {
 
 function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
   const [groupName, setGroupName] = useState<string>("");
-  const { UserId: myUserId, UserEmail: userName } = useAuthStore();
+  const { UserId: myUserId, Username, UserEmail } = useAuthStore();
   const { sendMessage, socket } = useWebSocketStore();
 
   async function handleCreateGroup() {
-    if (myUserId && userName) {
-      memberList.push({ userId: myUserId, userName });
+    if (myUserId && Username && UserEmail) {
+      memberList.push({
+        userId: myUserId,
+        userName: Username,
+        userEmail: UserEmail,
+      });
     }
 
     // const response = await axios.post<createChatData>(
@@ -68,7 +72,7 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
         label="groupName"
         placeholder="eg : class-group"
         value={groupName}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
           setGroupName(e.target.value)
         }
       />

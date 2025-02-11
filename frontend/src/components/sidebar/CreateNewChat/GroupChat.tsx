@@ -23,8 +23,15 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
 
-  function handleAddMember(userId: number, userName: string) {
-    setMemberList((prev: ChatMembers[]) => [...prev, { userId, userName }]);
+  function handleAddMember(
+    userId: number,
+    userName: string,
+    userEmail: string
+  ) {
+    setMemberList((prev: ChatMembers[]) => [
+      ...prev,
+      { userId, userName, userEmail },
+    ]);
   }
 
   function handleRemoveFromGroup(userId: number) {
@@ -65,7 +72,7 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
           <h1>
             {user.email}
             <button
-              onClick={() => handleAddMember(user.id, user.email)}
+              onClick={() => handleAddMember(user.id, user.name, user.email)}
               className="bg-yellow-300"
             >
               Add

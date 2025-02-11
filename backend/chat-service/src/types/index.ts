@@ -31,6 +31,7 @@ const createChatDataSchema = z
       z.object({
         userId: z.number(),
         userName: z.string(),
+        userEmail: z.string(),
       })
     ),
     chatType: z.nativeEnum(CHATTYPE),

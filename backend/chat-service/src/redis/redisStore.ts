@@ -6,6 +6,7 @@ interface ChatMembers {
   userName: string;
   role: Role;
   joined_at: Date;
+  userEmail: string;
 }
 
 interface ClientPayloadChatMembers extends ChatMembers {

@@ -11,10 +11,11 @@ type User = {
   id: number;
   email: string;
 };
-
+// TODO: FIX THE USERNAME AND USEREMAIL PROBLEM ASAP
 type memberList = {
   userId: number;
   userName: string;
+  userEmail: string;
 };
 
 type UserDate = {
@@ -39,20 +40,31 @@ interface NewChatProps {
 function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
-  const { UserId: myUserId, UserEmail: userName } = useAuthStore();
+  const { UserId: myUserId, Username, UserEmail } = useAuthStore();
   const { chats } = useChatStore();
   const [chatType, setChatType] = useState<CHATTYPE>(CHATTYPE.ONETOONE);
   const sendMessage = useWebSocketStore((state) => state.sendMessage);
 
   const { socket } = useWebSocketStore();
 
-  function handleAddMember(userId: number, userName: string) {
-    setMemberList((prev: memberList[]) => [...prev, { userId, userName }]);
+  function handleAddMember(
+    userId: number,
+    userName: string,
+    userEmail: string
+  ) {
+    setMemberList((prev: memberList[]) => [
+      ...prev,
+      { userId, userName, userEmail },
+    ]);
   }
 
   async function handlecreateNewChat() {
-    if (myUserId && userName) {
-      memberList.push({ userId: myUserId, userName });
+    if (myUserId && Username && UserEmail) {
+      memberList.push({
+        userId: myUserId,
+        userName: Username,
+        userEmail: UserEmail,
+      });
     }
 
     console.log({
@@ -71,18 +83,18 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
     console.log(chats, memberList);
 
     const sorted = [...memberList].sort((a, b) =>
-      a.userName.toLowerCase().localeCompare(b.userName.toLowerCase())
+      a.userEmail.toLowerCase().localeCompare(b.userEmail.toLowerCase())
     );
-    
+
     for (let i = 0; i < chats.length; i++) {
       console.log(chats[i]);
-    
+
       const sortedChat = [...chats[i].chatMembers].sort((a, b) =>
-        a.userName.toLowerCase().localeCompare(b.userName.toLowerCase())
+        a.userEmail.toLowerCase().localeCompare(b.userEmail.toLowerCase())
       );
-    
+
       if (sorted.length !== sortedChat.length) continue;
-    
+
       if (
         sorted[0].userId === sortedChat[0].userId &&
         sorted[1].userId === sortedChat[1].userId
@@ -92,7 +104,6 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
         return;
       }
     }
-    
 
     // const response = await axios.post<createChatData>(
     //   "http://localhost:3000/api/v1/chat/create",
@@ -168,9 +179,9 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
         <div>
           <h1
             className="cursor-pointer"
-            onClick={() => handleAddMember(user.id, user.email)}
+            onClick={() => handleAddMember(user.id, user.name, user.email)}
           >
-            {user.email}
+            {user.email}{user.name}
           </h1>
         </div>
       ))}

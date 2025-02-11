@@ -40,13 +40,13 @@ function MessageArea({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        <ul className="flex flex-col space-y-4 flex-wrap">
+        <ul className="flex flex-col space-y-4">
           {messages.map((message) => {
             const isOwnMessage = UserId == message.senderId;
             return (
               <li
                 key={message.id}
-                className={`flex flex-col text-wrap w-20${
+                className={`flex flex-col max-w-[70%] break-words break-all overflow-wrap-break-word  ${
                   isOwnMessage ? "self-end items-end" : "self-start items-start"
                 }`}
               >

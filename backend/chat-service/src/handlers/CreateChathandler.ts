@@ -10,6 +10,7 @@ interface ChatMembers {
   userName: string;
   role: Role;
   joined_at: Date;
+  userEmail: string;
 }
 
 interface CreateChatTye extends BaseMessageType {
@@ -116,6 +117,7 @@ class CreateChatHandler extends BaseMessageHandler {
             userId: member.userId,
             chatId: createChat.id,
             userName: member.userName,
+            userEmail: member.userEmail,
             role:
               chatType === CHATTYPE.GROUPCHAT && member.userId == createrId
                 ? "ADMIN"
@@ -126,6 +128,7 @@ class CreateChatHandler extends BaseMessageHandler {
             joined_at: true,
             role: true,
             userName: true,
+            userEmail: true,
           },
         })
       );

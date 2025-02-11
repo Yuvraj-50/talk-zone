@@ -42,8 +42,6 @@ function ChatDashboard() {
     removeTypingUser,
   } = useChatStore();
 
-  // Your existing useEffect code remains the same
-
   useEffect(() => {
     connect("ws://localhost:3000");
     return () => {
@@ -105,7 +103,7 @@ function ChatDashboard() {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className=" bg-[#1E1E1E] border-r border-gray-700 flex flex-col">
+        <div className=" bg-[#1E1E1E] border-r border-gray-700 flex flex-col w-[30%]">
           <div className="p-4 border-b border-gray-700">
             <div className="flex justify-between items-center">
               <h1 className="text-lg font-semibold">Chats</h1>
@@ -117,12 +115,12 @@ function ChatDashboard() {
           </div>
         </div>
 
-        <div className="flex-1 bg-[#1E1E1E] flex flex-col mb-2 h-full">
+        <div className="flex-1 bg-[#1E1E1E] flex flex-col mb-2 h-full w-[70%]">
           <div className="flex-1 overflow-y-auto">
             <MessageArea messageLoading={messageLoading} isTyping={isTyping} />
           </div>
           <div className="border-t border-gray-700">
-            <MessageInput setIsTyping={setIsTyping} />
+            <MessageInput />
           </div>
         </div>
       </div>

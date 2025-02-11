@@ -4,11 +4,12 @@ interface InputProps {
   label?: string;
   placeholder?: string;
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   type?: string;
   error?: string;
   className?: string;
-  ref?: React.RefObject<HTMLInputElement>;
+  ref?: React.RefObject<HTMLTextAreaElement>;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -20,8 +21,9 @@ const Input: React.FC<InputProps> = ({
   error,
   className,
   ref,
+  onKeyDown,
 }) => {
-  const defaultClass = `w-full px-4 py-2 border rounded-lg bg-[#1f1f1f] text-white focus:outline-none focus:ring-2 ${
+  const defaultClass = `w-full px-4 py-2 border rounded-lg bg-[#1f1f1f] text-white focus:outline-none focus:ring-2 resize-none origin-top ${
     error
       ? "border-red-500 focus:ring-red-500"
       : "border-gray-700 focus:ring-blue-500"
@@ -32,7 +34,7 @@ const Input: React.FC<InputProps> = ({
     : defaultClass;
 
   return (
-    <div className="w-full">
+    <div className="w-full h-10">
       {label && (
         <label
           htmlFor={label}
@@ -42,14 +44,16 @@ const Input: React.FC<InputProps> = ({
         </label>
       )}
 
-      <input
+      <textarea
+        rows={1}
+        wrap="soft"
         id={label}
-        type={type}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
         className={processedClasses}
         ref={ref}
+        onKeyDown={onKeyDown}
       />
 
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
