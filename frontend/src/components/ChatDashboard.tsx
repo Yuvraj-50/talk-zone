@@ -35,11 +35,14 @@ function ChatDashboard() {
   const { updateActiveChatId, updateActiveChatName, activechatId } =
     useActiveChatStore();
 
+  const sendMessage = useWebSocketStore((state) => state.sendMessage);
+
   const {
     updateChat,
     updateMemberOnlineStatus,
     setTypingUser,
     removeTypingUser,
+    updateUnreadCount,
   } = useChatStore();
 
   useEffect(() => {
@@ -53,6 +56,13 @@ function ChatDashboard() {
     registerMessageHandler(MessageType.SEND_MESSAGE, (message: ChatMessage) => {
       if (message.chatId === activechatId) {
         useMessagesStore.getState().appendMessage(message);
+        const payload = {
+          type: MessageType.UNREADMESSAGECOUNT,
+          data: {
+            chatId: activechatId,
+          },
+        };
+        sendMessage(payload);
       }
 
       const prevIdx = chats.findIndex((chat) => chat.chatId === message.chatId);
@@ -64,6 +74,10 @@ function ChatDashboard() {
           ...chats.filter((_, index) => index !== prevIdx),
         ];
         updateChat(newList);
+
+        if (message.senderId !== userId && message.chatId !== activechatId) {
+          updateUnreadCount(message.chatId);
+        }
       }
     });
 

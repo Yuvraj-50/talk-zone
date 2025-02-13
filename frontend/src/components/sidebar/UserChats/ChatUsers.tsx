@@ -4,19 +4,20 @@ import { memo, useEffect } from "react";
 import useActiveChatStore from "../../../zustand/activeChatStore";
 import ChatMessage from "./ChatMessage";
 import changeChat from "../../../utils";
-import { CHATTYPE, UserConversation } from "../../../types";
+import { CHATTYPE, MessageType, UserConversation } from "../../../types";
 import axios from "axios";
+import useWebSocketStore from "../../../zustand/socketStore";
 
 function ChatUsers({
   setMessageLoading,
 }: {
   setMessageLoading: (loading: boolean) => void;
 }) {
-  const { chats } = useChatStore();
+  const { chats, updateChat, resetUnreadCount } = useChatStore();
   const { updateMessages } = useMessagesStore();
-  const { updateActiveChatId, updateActiveChatName, activechatId } =
-    useActiveChatStore();
-  const { updateChat } = useChatStore();
+  const { updateActiveChatId, updateActiveChatName } = useActiveChatStore();
+  const socket = useWebSocketStore((state) => state.socket);
+  const sendMessage = useWebSocketStore((state) => state.sendMessage);
 
   async function handleChangeChat(id: number, chatName: string) {
     setMessageLoading(true);
@@ -24,8 +25,19 @@ function ChatUsers({
     updateActiveChatId(id);
     updateActiveChatName(chatName);
     const messages = await changeChat(id);
+    resetUnreadCount(id);
     updateMessages(messages);
     setMessageLoading(false);
+    if (socket) {
+      const payload = {
+        type: MessageType.UNREADMESSAGECOUNT,
+        data: {
+          chatId: id,
+        },
+      };
+
+      sendMessage(payload);
+    }
   }
 
   useEffect(() => {
@@ -60,6 +72,7 @@ function ChatUsers({
               chatId={chat.chatId}
               isOnline={isOnline}
               chatType={chat.chatType}
+              unreadCount={chat.unreadCount}
               onClick={() => handleChangeChat(chat.chatId, chat.chatName)}
             />
           );

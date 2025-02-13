@@ -1,7 +1,8 @@
 // Conversation.js
-import { FaRegUserCircle, FaCircle } from "react-icons/fa";
+import { FaRegUserCircle } from "react-icons/fa";
 import useActiveChatStore from "../../../zustand/activeChatStore";
 import { CHATTYPE } from "../../../types";
+import { useChatStore } from "../../../zustand/ChatsStore";
 
 interface Conversation {
   chatName: string;
@@ -11,6 +12,7 @@ interface Conversation {
   onClick?: () => void;
   chatId: number;
   isOnline: boolean;
+  unreadCount: number;
   chatType: CHATTYPE;
 }
 
@@ -22,6 +24,7 @@ const Conversation = ({
   chatId,
   isOnline,
   chatType,
+  unreadCount,
   onClick,
 }: Conversation) => {
   const { activechatId } = useActiveChatStore();
@@ -62,6 +65,11 @@ const Conversation = ({
         <div className="flex justify-between items-center">
           <h3 className="text-white font-medium text-lg">{chatName}</h3>
           <span className="text-gray-400 text-sm">2:30 pm</span>
+          {unreadCount > 0 && (
+            <span className="bg-green-500 rounded-full w-5 h-5 flex justify-center items-center">
+              {unreadCount}
+            </span>
+          )}
         </div>
         <div className="flex justify-between items-center mt-1">
           <p className="text-gray-400 text-sm">{latestMessage}</p>

@@ -12,6 +12,8 @@ interface ChatsAction {
   updateMemberOnlineStatus: (id: number, status: boolean) => void;
   setTypingUser: (chatId: number, userName: string) => void;
   removeTypingUser: (chatId: number, userName: string) => void;
+  updateUnreadCount: (chatId: number) => void;
+  resetUnreadCount: (chatId: number) => void;
 }
 
 export const useChatStore = create<Chats & ChatsAction>()(
@@ -52,6 +54,21 @@ export const useChatStore = create<Chats & ChatsAction>()(
           state.typingUsers[chatId] = filtered;
         } else {
           delete state.typingUsers[chatId];
+        }
+      }),
+    updateUnreadCount: (chatId: number) =>
+      set((state) => {
+        const chat = state.chats.find((chat) => chat.chatId == chatId);
+        if (chat) {
+          chat.unreadCount++;
+        }
+      }),
+
+    resetUnreadCount: (chatId: number) =>
+      set((state) => {
+        const chat = state.chats.find((chat) => chat.chatId == chatId);
+        if (chat) {
+          chat.unreadCount = 0;
         }
       }),
   }))

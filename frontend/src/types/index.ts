@@ -40,6 +40,7 @@ export interface UserConversation {
   chatName: string;
   chatType: CHATTYPE;
   chatMembers: UserConversationChatMembers[];
+  unreadCount: number;
 }
 
 export enum MessageType {
@@ -49,6 +50,7 @@ export enum MessageType {
   ONLINE_STATUS = "ONLINE_STATUS",
   AUTH_STATUS = "AUTH_STATUS",
   ERROR = "ERROR",
+  UNREADMESSAGECOUNT = "UNREADMESSAGECOUNT",
 }
 
 export interface UpdateOnlineStatus {
