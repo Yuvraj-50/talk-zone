@@ -7,6 +7,7 @@ export enum MessageType {
   ONLINE_STATUS = "ONLINE_STATUS",
   AUTH_STATUS = "AUTH_STATUS",
   ERROR = "ERROR",
+  UNREADMESSAGECOUNT = "UNREADMESSAGECOUNT",
 }
 
 export interface JWTPAYLOAD {
@@ -52,6 +53,10 @@ const typingIndicatorSchema = z.object({
   isTyping: z.boolean(),
 });
 
+const unReadMsgCountSchema = z.object({
+  chatId: z.number(),
+});
+
 export const UserSocketMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(MessageType.SEND_MESSAGE),
@@ -66,6 +71,11 @@ export const UserSocketMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(MessageType.TYPING),
     data: typingIndicatorSchema,
+  }),
+
+  z.object({
+    type: z.literal(MessageType.UNREADMESSAGECOUNT),
+    data: unReadMsgCountSchema,
   }),
 ]);
 

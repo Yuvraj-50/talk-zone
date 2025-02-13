@@ -44,6 +44,7 @@ wss.on("connection", async (ws: WebSocket, req: Request) => {
   // a binary data of single size with value beign HEARTBEAT_VALUE
 
   ws.on("message", async (msg, isBinary) => {
+    console.log("pong from client");
     if (isBinary && (msg as any)[0] == HEARTBEAT_VALUE) {
       ws.isAlive = true;
     } else {
@@ -55,6 +56,12 @@ wss.on("connection", async (ws: WebSocket, req: Request) => {
     await UserManager.getInstance().removeUser(userDetail.id);
   });
 });
+
+// TODO: FIX THE PUBLISHING MESSAGE WHEN THE USER JOINS RIGHT NOW DUPLICATE MESSAGE
+// ARE BEIGN SENT FIX THOSE A SAP
+
+// TODO: WHEN USER JUST CLOSE THE WINDOW WITHOUT DISCONNECT THEN STATUS OFFLIEN
+// IS NOT HAPPENDING FIX THAT BUG ALSO
 
 console.log(wss.clients.size, "THIS THE SIZE OF THE WSS ");
 

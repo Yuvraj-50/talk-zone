@@ -25,7 +25,7 @@ model Chats {
   createdAt   DateTime      @default(now())
   chatmembers ChatMembers[]
   messages    Messages[]
-  created_at  DateTime      @default(now())
+  unreadCount UnreadCount[]
 }
 
 model ChatMembers {
@@ -42,28 +42,20 @@ model ChatMembers {
 }
 
 model Messages {
-  id            Int             @id @default(autoincrement())
-  chat          Chats           @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  chatId        Int
-  senderId      Int
-  message       String
-  sent_at       DateTime        @default(now())
-  messageStatus MessageStatus[]
+  id       Int      @id @default(autoincrement())
+  chat     Chats    @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId   Int
+  senderId Int
+  message  String
+  sent_at  DateTime @default(now())
 }
 
-enum MsgStatus {
-  DELEVIRED
-  SENT
-  READ
-}
+model UnreadCount {
+  id     Int   @id @default(autoincrement())
+  chatId Int
+  chat   Chats @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  count  Int   @default(0)
+  userId Int
 
-model MessageStatus {
-  id         Int       @id @default(autoincrement())
-  messageId  Int
-  messages   Messages  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  userId     Int
-  status     MsgStatus
-  updated_at DateTime  @updatedAt
-
-  @@unique([messageId, userId])
+  @@unique([chatId, userId])
 }

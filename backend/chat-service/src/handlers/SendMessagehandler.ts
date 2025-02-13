@@ -27,6 +27,8 @@ export class SendMessageHandler extends BaseMessageHandler {
       data: storedMessage,
     };
 
+    await this.increaseMessageCnt(groupId, userId, groupMembers);
+
     this.broadCastToGroup(JSON.stringify(messagePayload), groupMembers);
   }
 
@@ -112,5 +114,34 @@ export class SendMessageHandler extends BaseMessageHandler {
     } else {
       await this.userManager.publishToRedis(`chat_${id}`, message);
     }
+  }
+
+  async increaseMessageCnt(
+    chatId: number,
+    loggedInUser: number,
+    groupMembers: GroupMembers[]
+  ) {
+    const unreadCountPromise = [];
+
+    for (const { userId } of groupMembers) {
+      if (userId == loggedInUser) continue;
+      unreadCountPromise.push(
+        prisma.unreadCount.upsert({
+          where: {
+            chatId_userId: { chatId, userId },
+          },
+          update: {
+            count: { increment: 1 },
+          },
+          create: {
+            userId,
+            chatId,
+            count: 1,
+          },
+        })
+      );
+    }
+
+    await Promise.all(unreadCountPromise);
   }
 }

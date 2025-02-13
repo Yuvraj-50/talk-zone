@@ -13,13 +13,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@prisma/client": "^6.3.1",
     "@types/node": "^22.10.7",
     "nodemon": "^3.1.9",
     "prisma": "^6.3.1",
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@prisma/client": "^6.3.1",
     "@types/axios": "^0.9.36",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",

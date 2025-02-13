@@ -35,6 +35,7 @@ interface ClientResPayload {
     chatName: string | null;
     createdBy: number | null;
     chatType: CHATTYPE;
+    unreadCount: number;
   };
 }
 
@@ -63,6 +64,7 @@ class CreateChatHandler extends BaseMessageHandler {
         createdBy: createdChat.createdBy,
         message: "Chat created successfully",
         chatType: chatdata.chatType,
+        unreadCount: 0,
       },
     };
 

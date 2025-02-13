@@ -20,6 +20,7 @@ type createChatData = {
   chatName: string;
   chatType: CHATTYPE;
   createdBy: number;
+  unreadCount: number;
   chatMembers: {
     userId: number;
     userName: string;
@@ -124,26 +125,51 @@ export async function GetChat(req: Request, res: Response) {
   const loggedInUserId = req.user?.id;
 
   try {
-    const chatMemberships = await prisma.chatMembers.findMany({
+    // const chatMemberships = await prisma.chatMembers.findMany({
+    //   where: {
+    //     userId: loggedInUserId,
+    //   },
+    //   select: {
+    //     chatId: true,
+    //     chat: {
+    //       select: {
+    //         name: true,
+    //         createdBy: true,
+    //         created_at: true,
+    //         chatmembers: {
+    //           select: {
+    //             userId: true,
+    //             userName: true,
+    //             role: true,
+    //             joined_at: true,
+    //             userEmail: true,
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
+
+    const chats = await prisma.chats.findMany({
       where: {
-        userId: loggedInUserId,
+        chatmembers: {
+          some: { userId: loggedInUserId },
+        },
       },
-      select: {
-        chatId: true,
-        chat: {
+      include: {
+        chatmembers: {
           select: {
-            name: true,
-            createdBy: true,
-            created_at: true,
-            chatmembers: {
-              select: {
-                userId: true,
-                userName: true,
-                role: true,
-                joined_at: true,
-                userEmail: true,
-              },
-            },
+            userId: true,
+            userName: true,
+            userEmail: true,
+            role: true,
+            joined_at: true,
+          },
+        },
+        unreadCount: {
+          where: { userId: loggedInUserId },
+          select: {
+            count: true,
           },
         },
       },
@@ -151,10 +177,9 @@ export async function GetChat(req: Request, res: Response) {
 
     const formattedChats: createChatData[] = [];
 
-    for (const membership of chatMemberships) {
-      const { chat } = membership;
-      const otherMember = chat.chatmembers.find(
-        (member) => member.userId !== loggedInUserId
+    for (const chat of chats) {
+      const otherUser = chat.chatmembers.find(
+        (member) => member.userId != loggedInUserId
       );
 
       const chatmemeberswithstatus = await RedisStore.getMemberStatus(
@@ -162,13 +187,35 @@ export async function GetChat(req: Request, res: Response) {
       );
 
       formattedChats.push({
-        chatId: membership.chatId,
-        chatName: chat.name ?? otherMember?.userName ?? "unknown chat",
-        chatMembers: chatmemeberswithstatus,
+        chatId: chat.id,
+        chatName: chat.name ?? otherUser?.userName ?? "unkonwnChat",
         chatType: chat.name ? CHATTYPE.GROUPCHAT : CHATTYPE.ONETOONE,
         createdBy: chat.createdBy,
+        chatMembers: chatmemeberswithstatus,
+        unreadCount:
+          chat.unreadCount.length > 0 ? chat.unreadCount[0].count : 0,
       });
     }
+
+    // for (const membership of chatMemberships) {
+    //   const { chat } = membership;
+    //   const otherMember = chat.chatmembers.find(
+    //     (member) => member.userId !== loggedInUserId
+    //   );
+
+    //   const chatmemeberswithstatus = await RedisStore.getMemberStatus(
+    //     chat.chatmembers
+    //   );
+
+    //   formattedChats.push({
+    //     chatId: membership.chatId,
+    //     chatName: chat.name ?? otherMember?.userName ?? "unknown chat",
+    //     chatMembers: chatmemeberswithstatus,
+    //     chatType: chat.name ? CHATTYPE.GROUPCHAT : CHATTYPE.ONETOONE,
+    //     createdBy: chat.createdBy,
+    //     // unreadCount: chat.unreadCount
+    //   });
+    // }
 
     // const formattedChats: createChatData[] = chatMemberships.map(
     // async (membership) => {
