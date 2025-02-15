@@ -106,6 +106,26 @@ class CreateChatHandler extends BaseMessageHandler {
     chatType: CHATTYPE
   ) {
     try {
+      if (chatType == CHATTYPE.ONETOONE) {
+        const existingChat = await prisma.chats.findFirst({
+          where: {
+            chatmembers: {
+              every: {
+                OR: chatMembers,
+              },
+            },
+          },
+        });
+        
+        console.log(existingChat);
+
+        if (existingChat) {
+          throw new Error(
+            "A one-to-one chat between these users already exists."
+          );
+        }
+      }
+
       const createChat = await prisma.chats.create({
         data: {
           createdBy: createrId,

@@ -83,7 +83,7 @@ class UserManager {
       });
       return chatMembers;
     } catch (error) {
-      console.log("error");
+      console.log("error", error);
     }
   }
 
