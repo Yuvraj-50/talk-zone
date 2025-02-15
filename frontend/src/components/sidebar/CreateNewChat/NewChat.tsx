@@ -1,142 +1,124 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import Input from "../../../ui/Input";
 import { useAuthStore } from "../../../zustand/authStore";
 import { useChatStore } from "../../../zustand/ChatsStore";
 import axios from "axios";
 import useWebSocketStore from "../../../zustand/socketStore";
-import { CHATTYPE, MessageType } from "../../../types";
+import {
+  ChatMembers,
+  CHATTYPE,
+  MessageType,
+  User,
+  UserConversation,
+} from "../../../types";
+import { Input } from "@/components/ui/input";
+import changeChat from "@/lib";
+import { useMessagesStore } from "@/zustand/messageStore";
+import useActiveChatStore from "@/zustand/activeChatStore";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { AvatarFallback } from "@radix-ui/react-avatar";
+import { Plus } from "lucide-react";
+import Adduseritem from "@/components/Adduseritem";
 
-type User = {
-  name: string;
-  id: number;
-  email: string;
-};
 // TODO: FIX THE USERNAME AND USEREMAIL PROBLEM ASAP
-type memberList = {
-  userId: number;
-  userName: string;
-  userEmail: string;
-};
-
-type UserDate = {
-  users: {
-    name: string;
-    id: number;
-    email: string;
-  }[];
-};
-
-// type MemberList = {
-//   userId: number;
-//   userName: string;
-// };
+interface UserDate {
+  users: User[];
+}
 
 interface NewChatProps {
   changeStep: Dispatch<SetStateAction<number>>;
-  memberList: memberList[];
-  setMemberList: Dispatch<SetStateAction<memberList[]>>;
 }
 
-function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
+function NewChat({ changeStep }: NewChatProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
+
   const { UserId: myUserId, Username, UserEmail } = useAuthStore();
-  const { chats } = useChatStore();
-  const [chatType, setChatType] = useState<CHATTYPE>(CHATTYPE.ONETOONE);
-  const sendMessage = useWebSocketStore((state) => state.sendMessage);
+  const { chats, resetUnreadCount } = useChatStore();
+  const { updateMessages } = useMessagesStore();
+  const { updateActiveChatId, updateActiveChatName } = useActiveChatStore();
+  const { socket, sendMessage } = useWebSocketStore();
 
-  const { socket } = useWebSocketStore();
-
-  function handleAddMember(
-    userId: number,
-    userName: string,
-    userEmail: string
-  ) {
-    setMemberList((prev: memberList[]) => [
-      ...prev,
-      { userId, userName, userEmail },
-    ]);
-  }
-
-  async function handlecreateNewChat() {
-    if (myUserId && Username && UserEmail) {
-      memberList.push({
-        userId: myUserId,
-        userName: Username,
-        userEmail: UserEmail,
-      });
-    }
-
-    console.log({
-      members: memberList,
-      chatType: CHATTYPE.ONETOONE,
-      groupName: null,
-      createrId: myUserId,
-    });
-
-    if (memberList.length != 2) {
-      console.log("Not a valid chat");
-      setMemberList([]);
-      return;
-    }
-
-    console.log(chats, memberList);
-
-    const sorted = [...memberList].sort((a, b) =>
+  function findExistingChat(chatMembers: ChatMembers[]) {
+    const sortedMemberList = [...chatMembers].sort((a, b) =>
       a.userEmail.toLowerCase().localeCompare(b.userEmail.toLowerCase())
     );
 
-    for (let i = 0; i < chats.length; i++) {
-      console.log(chats[i]);
-
-      const sortedChat = [...chats[i].chatMembers].sort((a, b) =>
+    for (const chat of chats) {
+      const sortedMember = [...chat.chatMembers].sort((a, b) =>
         a.userEmail.toLowerCase().localeCompare(b.userEmail.toLowerCase())
       );
 
-      if (sorted.length !== sortedChat.length) continue;
-
       if (
-        sorted[0].userId === sortedChat[0].userId &&
-        sorted[1].userId === sortedChat[1].userId
+        sortedMember[0].userEmail == sortedMemberList[0].userEmail &&
+        sortedMember[1].userEmail == sortedMemberList[1].userEmail
       ) {
-        console.log("A chat already exists");
-        console.log(sorted, sortedChat, chats);
-        return;
+        return chat;
       }
     }
 
-    // const response = await axios.post<createChatData>(
-    //   "http://localhost:3000/api/v1/chat/create",
-    //   {
-    //     members: memberList,
-    //     chatType: "oneToOne",
-    //     groupName: null,
-    //     createrId: myUserId,
-    //   },
-    //   {
-    //     withCredentials: true,
-    //   }
-    // );
+    return null;
+  }
 
-    // updateChat([...useChatStore.getState().chats, response.data]);
-    // setMemberList([]);
-    // updateActiveChatId(response.data.chatId);
-    // updateActiveChatName(response.data.chatName);
-    // const messages = await changeChat(response.data.chatId);
-    // updateMessages(messages);
+  async function handleExistingChat(chat: UserConversation) {
+    updateMessages([]);
+    updateActiveChatId(chat.chatId);
+    updateActiveChatName(chat.chatName);
+    const messages = await changeChat(chat.chatId);
+    resetUnreadCount(chat.chatId);
+    updateMessages(messages);
+    const chatToChange = chats.find((chat) => chat.chatId == chat.chatId);
+    if (socket && (chatToChange?.unreadCount ?? 0) > 0) {
+      const payload = {
+        type: MessageType.UNREADMESSAGECOUNT,
+        data: {
+          chatId: chat.chatId,
+        },
+      };
 
+      sendMessage(payload);
+    }
+  }
+
+  async function createNewChat(members: ChatMembers[]) {
     if (socket) {
       const payload = {
         type: MessageType.CREATE_CHAT,
         data: {
-          members: memberList,
+          members,
           chatType: CHATTYPE.ONETOONE,
           groupName: null,
           createrId: myUserId,
         },
       };
       sendMessage(payload);
-      setMemberList([]);
+    }
+  }
+
+  async function handlecreateNewChat(member: ChatMembers) {
+    let otherMembers: ChatMembers[] = [member];
+
+    if (myUserId && Username && UserEmail) {
+      otherMembers.push({
+        userId: myUserId,
+        userName: Username,
+        userEmail: UserEmail,
+      });
+    }
+
+    if (otherMembers.length != 2) {
+      console.log("low members");
+      return;
+    }
+
+    const existingChat = findExistingChat(otherMembers);
+
+    if (existingChat) {
+      handleExistingChat(existingChat);
+      console.log("chat already exists");
+    } else {
+      createNewChat(otherMembers);
+      console.log("new chate created");
     }
   }
 
@@ -151,49 +133,63 @@ function NewChat({ changeStep, memberList, setMemberList }: NewChatProps) {
         withCredentials: true,
       })
       .then((res) => {
+        console.log(res.data.users);
         setUsers(() => [...res.data.users]);
       });
   }, [search]);
 
   return (
-    <div>
-      <h1>New Chat</h1>
-
-      <div
-        className="bg-purple-400 cursor-pointer"
-        onClick={() => {
-          changeStep(2);
-          setMemberList([]);
-        }}
-      >
-        Group Chat
-      </div>
+    <>
+      <h1 className="mb-2">One to One chat</h1>
 
       <Input
-        placeholder="search for user email"
+        placeholder="Find user to chat"
         onChange={(e) => setSearch(e.target.value)}
         value={search}
       />
 
-      {users.map((user) => (
-        <div>
-          <h1
-            className="cursor-pointer"
-            onClick={() => handleAddMember(user.id, user.name, user.email)}
-          >
-            {user.email}{user.name}
-          </h1>
-        </div>
-      ))}
+      <p className="text-center my-2">or</p>
 
-      {memberList.map((member) => (
-        <div className="bg-red-700"> {member.userName} </div>
-      ))}
+      <div
+        className="flex items-center cursor-pointer gap-2 hover:bg-secondary transition-colors"
+        onClick={() => {
+          changeStep(2);
+        }}
+      >
+        <Avatar className="flex items-center justify-center  bg-muted rounded-full">
+          <AvatarFallback>
+            <Plus />
+          </AvatarFallback>
+        </Avatar>
 
-      <button onClick={handlecreateNewChat} className="bg-yellow-400">
-        start Chatting
-      </button>
-    </div>
+        <button className="mb-2">Start Group Chat</button>
+      </div>
+
+      <ScrollArea className="h-52">
+        {users.map((user) => {
+          const existinguser = findExistingChat([
+            { userId: user.id, userEmail: user.email, userName: user.name },
+            { userId: myUserId!, userEmail: UserEmail!, userName: Username! },
+          ]);
+
+          return (
+            <Adduseritem
+              userName={user.name}
+              userEmail={user.email}
+              existinguser={existinguser ? true : false}
+              key={user.id}
+              onClick={() =>
+                handlecreateNewChat({
+                  userId: user.id,
+                  userName: user.name,
+                  userEmail: user.email,
+                })
+              }
+            />
+          );
+        })}
+      </ScrollArea>
+    </>
   );
 }
 

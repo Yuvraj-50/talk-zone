@@ -1,8 +1,9 @@
 import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
-import Input from "../../../ui/Input";
 import { useAuthStore } from "../../../zustand/authStore";
 import useWebSocketStore from "../../../zustand/socketStore";
 import { ChatMembers, CHATTYPE, MessageType } from "../../../types";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface GroupDetailsProps {
   memberList: ChatMembers[];
@@ -14,7 +15,8 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
   const { UserId: myUserId, Username, UserEmail } = useAuthStore();
   const { sendMessage, socket } = useWebSocketStore();
 
-  async function handleCreateGroup() {
+  async function handleCreateGroup(e: ChangeEvent<HTMLFormElement>) {
+    e.preventDefault();
     if (myUserId && Username && UserEmail) {
       memberList.push({
         userId: myUserId,
@@ -22,33 +24,6 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
         userEmail: UserEmail,
       });
     }
-
-    // const response = await axios.post<createChatData>(
-    //   "http://localhost:3000/api/v1/chat/create",
-    //   {
-    //     members: memberList,
-    //     chatType: "group",
-    //     groupName: groupName,
-    //     createrId: myUserId,
-    //   },
-    //   {
-    //     withCredentials: true,
-    //   }
-    // );
-
-    // console.log(response, "data sent = ", {
-    //   members: memberList,
-    //   chatType: "group",
-    //   groupName: groupName,
-    //   createrId: myUserId,
-    // });
-
-    // updateChat([...useChatStore.getState().chats, response.data]);
-    // setMemberList([]);
-    // updateActiveChatId(response.data.chatId);
-    // updateActiveChatName(response.data.chatName);
-    // const messages = await changeChat(response.data.chatId);
-    // updateMessages(messages);
 
     if (socket) {
       const payload = {
@@ -67,19 +42,20 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
   }
 
   return (
-    <>
+    <form onSubmit={handleCreateGroup}>
+      <label htmlFor="group-name">Enter Group Name</label>
+
       <Input
-        label="groupName"
+        id="group-name"
         placeholder="eg : class-group"
         value={groupName}
-        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
           setGroupName(e.target.value)
         }
+        className="mb-5 mt-2"
       />
-      <button onClick={handleCreateGroup} className="bg-green-50">
-        create
-      </button>
-    </>
+      <Button className="w-full">create</Button>
+    </form>
   );
 }
 

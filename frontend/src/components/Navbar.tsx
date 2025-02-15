@@ -1,6 +1,10 @@
 import axios from "axios";
 import { useAuthStore } from "../zustand/authStore";
 import useWebSocketStore from "../zustand/socketStore";
+import { Button } from "./ui/button";
+import { Avatar } from "@radix-ui/react-avatar";
+import { AvatarFallback, AvatarImage } from "./ui/avatar";
+import { ModeToggle } from "./toggle-mode";
 
 function Navbar() {
   const { UserId, Username } = useAuthStore();
@@ -18,17 +22,19 @@ function Navbar() {
   }
 
   return (
-    <div className="flex items-center justify-between px-6 py-3 bg-[#1A1A1A] border-b border-gray-800">
+    <div className="flex items-center justify-between px-6 py-3">
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-medium text-white">{Username}</h1>
-        <span className="text-sm text-gray-400">ID: {UserId}</span>
+        <h1 className="text-lg font-medium">{Username}</h1>
+        <span className="text-sm">ID: {UserId}</span>
       </div>
-      <button
-        onClick={handleLogout}
-        className="px-4 py-2 text-sm font-medium text-gray-200 transition-colors rounded-lg bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600"
-      >
+      <Avatar>
+        <AvatarImage src="" alt="@shadcn" />
+        <AvatarFallback>Ys</AvatarFallback>
+      </Avatar>
+      <ModeToggle />
+      <Button variant="default" onClick={handleLogout}>
         Logout
-      </button>
+      </Button>
     </div>
   );
 }

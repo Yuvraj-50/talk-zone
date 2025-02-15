@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import Input from "../../ui/Input";
+import React, { useEffect, useRef, useState } from "react";
 import useWebSocketStore from "../../zustand/socketStore";
 import useActiveChatStore from "../../zustand/activeChatStore";
 import { MessageType } from "../../types";
 import { useAuthStore } from "../../zustand/authStore";
-import { IoIosSend } from "react-icons/io";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 
 function MessageInput() {
   const [inputValue, setInputValue] = useState<string>("");
@@ -86,19 +87,22 @@ function MessageInput() {
   }
 
   return (
-    <form className="flex" onSubmit={handleFormSubmit} ref={formRef}>
-      <Input
+    <form
+      className="flex items-center gap-2 p-2"
+      onSubmit={handleFormSubmit}
+      ref={formRef}
+    >
+      <Textarea
         value={inputValue}
         onChange={handleInputTyping}
-        type="text"
-        placeholder="Type a message"
         onKeyDown={handleKeyDownEvent}
+        placeholder="Type a message"
+        className="min-h-10 max-h-40 resize-none"
+        rows={1}
       />
-      <div className="bg-white flex justify-center items-center">
-        <button type="submit">
-          <IoIosSend size="2em" color="black" />
-        </button>
-      </div>
+      <Button type="submit" size="icon" className="h-10 w-10 shrink-0">
+        <Send className="h-5 w-5" />
+      </Button>
     </form>
   );
 }

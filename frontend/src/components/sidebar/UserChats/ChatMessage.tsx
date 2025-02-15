@@ -1,10 +1,11 @@
-// Conversation.js
 import { FaRegUserCircle } from "react-icons/fa";
-import useActiveChatStore from "../../../zustand/activeChatStore";
 import { CHATTYPE } from "../../../types";
-import { useChatStore } from "../../../zustand/ChatsStore";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface Conversation {
+interface ConversationProps {
   chatName: string;
   profilePic?: string;
   latestMessage?: string;
@@ -14,6 +15,7 @@ interface Conversation {
   isOnline: boolean;
   unreadCount: number;
   chatType: CHATTYPE;
+  isActive?: boolean;
 }
 
 const Conversation = ({
@@ -26,61 +28,70 @@ const Conversation = ({
   chatType,
   unreadCount,
   onClick,
-}: Conversation) => {
-  const { activechatId } = useActiveChatStore();
-
+  isActive = false,
+}: ConversationProps) => {
   return (
-    <div
-      className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors duration-300 ${
-        activechatId === chatId
-          ? "bg-gray-800 hover:bg-gray-700"
-          : "bg-gray-900 hover:bg-gray-800"
-      }`}
+    <Button
+      variant={isActive ? "secondary" : "ghost"}
+      className={cn(
+        "w-full px-4 py-6 h-auto flex items-center justify-between hover:bg-secondary/80",
+        isActive && "bg-secondary"
+      )}
       onClick={onClick}
     >
-      {/* Profile Picture */}
-      <div className="flex items-center">
-        {profilePic ? (
-          <img
-            src={profilePic}
-            alt={chatName}
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        ) : (
-          <FaRegUserCircle size={40} className="text-gray-500" />
-        )}
+      <div className="flex items-center gap-4 w-full">
+        <div className="relative">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={profilePic} alt={chatName} />
+            <AvatarFallback> {chatName[0].toUpperCase()} </AvatarFallback>
+          </Avatar>
 
-        {/* Online Status Indicator */}
-        {chatType === CHATTYPE.ONETOONE && (
-          <div
-            className={`ml-2 w-3 h-3 rounded-full ${
-              isOnline ? "bg-green-500" : "bg-gray-500"
-            }`}
-          />
-        )}
-      </div>
-
-      {/* Conversation Details */}
-      <div className="flex-1 ml-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-white font-medium text-lg">{chatName}</h3>
-          <span className="text-gray-400 text-sm">2:30 pm</span>
-          {unreadCount > 0 && (
-            <span className="bg-green-500 rounded-full w-5 h-5 flex justify-center items-center">
-              {unreadCount}
+          {chatType === CHATTYPE.ONETOONE && (
+            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background">
+              <span
+                className={cn(
+                  "absolute inline-flex h-full w-full rounded-full",
+                  isOnline ? "bg-primary" : "bg-gray-500"
+                )}
+              >
+                {isOnline && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                )}
+              </span>
             </span>
           )}
         </div>
-        <div className="flex justify-between items-center mt-1">
-          <p className="text-gray-400 text-sm">{latestMessage}</p>
-          {pendingMessages > 0 && (
-            <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs">
-              {pendingMessages}
-            </span>
-          )}
+
+        {/* Conversation Details */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-medium text-lg truncate">{chatName}</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-sm text-muted-foreground">2:30 pm</span>
+              {unreadCount > 0 && (
+                <Badge
+                  variant="default"
+                  className="h-5 w-5 flex items-center justify-center p-0"
+                >
+                  {unreadCount}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-sm text-muted-foreground truncate">
+              {latestMessage}
+            </p>
+            {pendingMessages > 0 && (
+              <Badge variant="default" className="ml-2">
+                {pendingMessages}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Button>
   );
 };
 

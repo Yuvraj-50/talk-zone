@@ -2,33 +2,35 @@ import { memo, useState } from "react";
 import GroupChat from "./GroupChat";
 import NewChat from "./NewChat";
 import GroupDetails from "./GroupDetails";
-import { ChatMembers } from "../../../types";
+import { ChatMembers, CHATTYPE } from "../../../types";
+import { SquarePlus } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 function CreateChat() {
-  const [showPopUp, setShowPopUp] = useState<boolean>(false);
   const [step, setStep] = useState(1);
   const [memberList, setMemberList] = useState<ChatMembers[]>([]);
 
   return (
-    <div className="relative">
-      <h1
-        className="cursor-pointer"
-        onClick={() => {
-          setShowPopUp((prev) => !prev);
-          setStep(1);
+    <div>
+      <Popover
+        onOpenChange={() => {
+          setMemberList([]);
         }}
       >
-        +
-      </h1>
-      {showPopUp && (
-        <div className="absolute top-5 bg-green-500 right-0 w-44 h-64">
-          {step == 1 && (
-            <NewChat
-              changeStep={setStep}
-              memberList={memberList}
-              setMemberList={setMemberList}
-            />
-          )}
+        <PopoverTrigger asChild>
+          <SquarePlus
+            className="cursor-pointer text-primary"
+            onClick={() => {
+              setStep(1);
+            }}
+          />
+        </PopoverTrigger>
+        <PopoverContent className="min-h-80">
+          {step == 1 && <NewChat changeStep={setStep} />}
 
           {step == 2 && (
             <GroupChat
@@ -44,8 +46,8 @@ function CreateChat() {
               setMemberList={setMemberList}
             />
           )}
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

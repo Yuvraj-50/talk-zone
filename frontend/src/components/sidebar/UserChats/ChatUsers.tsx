@@ -3,10 +3,11 @@ import { useChatStore } from "../../../zustand/ChatsStore";
 import { memo, useEffect } from "react";
 import useActiveChatStore from "../../../zustand/activeChatStore";
 import ChatMessage from "./ChatMessage";
-import changeChat from "../../../utils";
+import changeChat from "../../../lib";
 import { CHATTYPE, MessageType, UserConversation } from "../../../types";
 import axios from "axios";
 import useWebSocketStore from "../../../zustand/socketStore";
+import { ScrollArea } from "../../ui/scroll-area";
 
 function ChatUsers({
   setMessageLoading,
@@ -15,11 +16,13 @@ function ChatUsers({
 }) {
   const { chats, updateChat, resetUnreadCount } = useChatStore();
   const { updateMessages } = useMessagesStore();
-  const { updateActiveChatId, updateActiveChatName } = useActiveChatStore();
+  const { updateActiveChatId, updateActiveChatName, activechatId } =
+    useActiveChatStore();
   const socket = useWebSocketStore((state) => state.socket);
   const sendMessage = useWebSocketStore((state) => state.sendMessage);
 
   async function handleChangeChat(id: number, chatName: string) {
+    if (id === activechatId) return;
     setMessageLoading(true);
     updateMessages([]);
     updateActiveChatId(id);
@@ -28,7 +31,9 @@ function ChatUsers({
     resetUnreadCount(id);
     updateMessages(messages);
     setMessageLoading(false);
-    if (socket) {
+    const chatToChange = chats.find((chat) => chat.chatId == id);
+
+    if (socket && (chatToChange?.unreadCount ?? 0) > 0) {
       const payload = {
         type: MessageType.UNREADMESSAGECOUNT,
         data: {
@@ -60,25 +65,27 @@ function ChatUsers({
   }, []);
 
   return (
-    <div className="bg-[#121212] h-full p-4 text-white border-r border-gray-800 overflow-y-auto">
-      <div className="space-y-4">
+    <ScrollArea className="flex-1">
+      <div className="space-y-2 p-2">
         {chats.map((chat) => {
           const isOnline = chat.chatMembers.every((member) => member.isOnline);
+          const isActive = activechatId === chat.chatId;
 
           return (
             <ChatMessage
               key={chat.chatId}
-              chatName={chat.chatName}
               chatId={chat.chatId}
-              isOnline={isOnline}
+              chatName={chat.chatName}
               chatType={chat.chatType}
+              isOnline={isOnline}
               unreadCount={chat.unreadCount}
+              isActive={isActive}
               onClick={() => handleChangeChat(chat.chatId, chat.chatName)}
             />
           );
         })}
       </div>
-    </div>
+    </ScrollArea>
   );
 }
 

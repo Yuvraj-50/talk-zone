@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Dispatch, SetStateAction } from "react";
-
-import Input from "../../../ui/Input";
 import axios from "axios";
 import { ChatMembers, User } from "../../../types";
+import { CircleArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import Adduseritem from "@/components/Adduseritem";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type UserDate = {
-  users: {
-    name: string;
-    id: number;
-    email: string;
-  }[];
+  users: User[];
 };
 
 interface GroupChatProps {
@@ -34,7 +35,7 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
     ]);
   }
 
-  function handleRemoveFromGroup(userId: number) {
+  function handleRemoveMember(userId: number) {
     const filteredList = memberList.filter((member) => member.userId != userId);
     setMemberList(filteredList);
   }
@@ -59,39 +60,57 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
   }, [search]);
 
   return (
-    <div>
-      <button onClick={() => changeStep(1)}>back</button>
-      Create new group
+    <div className="flex flex-col  justify-between">
+      <div className="flex gap-2 items-center mb-4">
+        <CircleArrowLeft
+          className="cursor-pointer text-primary"
+          onClick={() => changeStep(1)}
+        />
+        <p>Create new group</p>
+      </div>
+
       <Input
         placeholder="search for user email"
         onChange={(e) => setSearch(e.target.value)}
         value={search}
       />
-      {users.map((user) => (
-        <div key={user.id}>
-          <h1>
-            {user.email}
-            <button
-              onClick={() => handleAddMember(user.id, user.name, user.email)}
-              className="bg-yellow-300"
-            >
-              Add
-            </button>
-          </h1>
+
+      <ScrollArea className="h-52">
+        {users.map((user) => (
+          <div key={user.id} className="flex hover:bg-secondary items-center">
+            <label htmlFor={user.email}>
+              <Adduseritem userName={user.name} userEmail={user.email} />
+            </label>
+            <Checkbox
+              id={user.email}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  handleAddMember(user.id, user.name, user.email);
+                } else {
+                  handleRemoveMember(user.id);
+                }
+              }}
+            />
+          </div>
+        ))}
+      </ScrollArea>
+
+      <ScrollArea className="my-3">
+        <div className="flex">
+          {memberList.map((member) => (
+            <Avatar key={member.userId}>
+              <AvatarImage></AvatarImage>
+              <AvatarFallback>
+                {member.userName[0].toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          ))}
         </div>
-      ))}
-      {memberList.map((member) => (
-        <div key={member.userId} className="bg-red-700">
-          {member.userName}
-          <button onClick={() => handleRemoveFromGroup(member.userId)}>
-            Remove
-          </button>
-        </div>
-      ))}
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
       {memberList.length > 0 && (
-        <button onClick={handleCreateGroupNextStep} className="bg-white">
-          Next
-        </button>
+        <Button onClick={handleCreateGroupNextStep}>Next</Button>
       )}
     </div>
   );
