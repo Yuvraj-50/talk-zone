@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { UserConversation } from "../types";
+import { UserConversation, UserConversationChatMembers } from "../types";
 import { immer } from "zustand/middleware/immer";
 
 interface Chats {
@@ -14,6 +14,10 @@ interface ChatsAction {
   removeTypingUser: (chatId: number, userName: string) => void;
   updateUnreadCount: (chatId: number) => void;
   resetUnreadCount: (chatId: number) => void;
+  addMemberToChat: (
+    chatId: number,
+    chatMembers: UserConversationChatMembers[]
+  ) => void;
 }
 
 export const useChatStore = create<Chats & ChatsAction>()(
@@ -56,6 +60,7 @@ export const useChatStore = create<Chats & ChatsAction>()(
           delete state.typingUsers[chatId];
         }
       }),
+
     updateUnreadCount: (chatId: number) =>
       set((state) => {
         const chat = state.chats.find((chat) => chat.chatId == chatId);
@@ -69,6 +74,16 @@ export const useChatStore = create<Chats & ChatsAction>()(
         const chat = state.chats.find((chat) => chat.chatId == chatId);
         if (chat) {
           chat.unreadCount = 0;
+        }
+      }),
+    addMemberToChat: (
+      chatId: number,
+      chatMembers: UserConversationChatMembers[]
+    ) =>
+      set((state) => {
+        const chat = state.chats.find((chat) => chat.chatId == chatId);
+        if (chat) {
+          chat.chatMembers = [...chat.chatMembers, ...chatMembers];
         }
       }),
   }))

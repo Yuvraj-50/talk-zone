@@ -174,6 +174,7 @@ function NewChat({ changeStep }: NewChatProps) {
 
           return (
             <Adduseritem
+              className="hover:bg-secondary cursor-pointer"
               userName={user.name}
               userEmail={user.email}
               existinguser={existinguser ? true : false}

@@ -2,25 +2,17 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "../zustand/authStore";
-import { User } from "../types";
-
-interface AuthResponse {
-  authenticated: boolean;
-  user: User | null;
-}
+import { AuthResponse } from "../types";
 
 export const useAuth = () => {
-  const [auth, setAuth] = useState<{
-    authenticated: boolean;
-    user: User | null;
-  }>({
-    authenticated: false,
-    user: null,
-  });
+  // const [auth, setAuth] = useState<AuthResponse>({
+  //   authenticated: false,
+  //   user: null,
+  // });
 
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { updateAuth } = useAuthStore();
+  const { updateAuth, authenticated } = useAuthStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -34,36 +26,34 @@ export const useAuth = () => {
 
         const { authenticated, user } = response.data;
 
-        setAuth({ authenticated, user });
-
-        console.log(user, "hello world");
-
-        if (user) {
+        if (authenticated && user) {
           updateAuth({
             Username: user.name,
             UserEmail: user.email,
             UserId: user.id,
+            authenticated: authenticated,
           });
         }
       } catch (err) {
-        setAuth({ authenticated: false, user: null });
+        // setAuth({ authenticated: false, user: null });
+        console.log(err);
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [updateAuth]);
 
   useEffect(() => {
     if (
-      auth.authenticated == true &&
+      authenticated == true &&
       (window.location.pathname == "/login" ||
         window.location.pathname == "/signup")
     ) {
       navigate("/");
     }
-  }, [auth, navigate]);
+  }, [navigate]);
 
-  return { ...auth, loading };
+  return { loading, authenticated };
 };

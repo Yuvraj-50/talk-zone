@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import axios from "axios";
 import { ChatMembers, User } from "../../../types";
@@ -15,12 +15,18 @@ type UserDate = {
 };
 
 interface GroupChatProps {
-  changeStep: Dispatch<SetStateAction<number>>;
   memberList: ChatMembers[];
+  alreadyMember?: ChatMembers[];
+  changeStep: Dispatch<SetStateAction<number>>;
   setMemberList: Dispatch<SetStateAction<ChatMembers[]>>;
 }
 
-function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
+function GroupChat({
+  changeStep,
+  memberList,
+  setMemberList,
+  alreadyMember,
+}: GroupChatProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
 
@@ -44,6 +50,11 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
     changeStep(3);
   }
 
+  function isUserAlreadyMember(id: number): boolean {
+    if (!alreadyMember) return false;
+    return alreadyMember.find((member) => member.userId == id) ? true : false;
+  }
+
   useEffect(() => {
     if (search === "") {
       setUsers([]);
@@ -55,7 +66,7 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
         withCredentials: true,
       })
       .then((res) => {
-        setUsers(() => [...res.data.users]);
+        setUsers([...res.data.users]);
       });
   }, [search]);
 
@@ -64,7 +75,10 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
       <div className="flex gap-2 items-center mb-4">
         <CircleArrowLeft
           className="cursor-pointer text-primary"
-          onClick={() => changeStep(1)}
+          onClick={() => {
+            changeStep(1);
+            setMemberList([]);
+          }}
         />
         <p>Create new group</p>
       </div>
@@ -77,11 +91,17 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
 
       <ScrollArea className="h-52">
         {users.map((user) => (
-          <div key={user.id} className="flex hover:bg-secondary items-center">
+          <div key={user.id} className="flex items-center">
             <label htmlFor={user.email}>
-              <Adduseritem userName={user.name} userEmail={user.email} />
+              <Adduseritem
+                className="cursor-pointer"
+                userName={user.name}
+                userEmail={user.email}
+              />
             </label>
             <Checkbox
+              disabled={isUserAlreadyMember(user.id)}
+              defaultChecked={isUserAlreadyMember(user.id)}
               id={user.email}
               onCheckedChange={(checked) => {
                 if (checked) {
@@ -95,23 +115,25 @@ function GroupChat({ changeStep, memberList, setMemberList }: GroupChatProps) {
         ))}
       </ScrollArea>
 
-      <ScrollArea className="my-3">
-        <div className="flex">
-          {memberList.map((member) => (
-            <Avatar key={member.userId}>
-              <AvatarImage></AvatarImage>
-              <AvatarFallback>
-                {member.userName[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <div className="sticky bottom-0">
+        <ScrollArea className="my-3">
+          <div className="flex">
+            {memberList.map((member) => (
+              <Avatar key={member.userId}>
+                <AvatarImage></AvatarImage>
+                <AvatarFallback>
+                  {member.userName[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
-      {memberList.length > 0 && (
-        <Button onClick={handleCreateGroupNextStep}>Next</Button>
-      )}
+        {memberList.length > 0 && (
+          <Button onClick={handleCreateGroupNextStep}>Next</Button>
+        )}
+      </div>
     </div>
   );
 }

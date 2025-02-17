@@ -4,6 +4,11 @@ export type User = {
   email: string;
 };
 
+export interface AuthResponse {
+  authenticated: boolean;
+  user: User | null;
+}
+
 export enum Role {
   "MEMBER",
   "ADMIN",
@@ -31,7 +36,7 @@ export enum CHATTYPE {
   "GROUPCHAT" = "GROUPCHAT",
 }
 
-interface UserConversationChatMembers extends ChatMembers {
+export interface UserConversationChatMembers extends ChatMembers {
   isOnline: boolean;
 }
 
@@ -51,6 +56,7 @@ export enum MessageType {
   AUTH_STATUS = "AUTH_STATUS",
   ERROR = "ERROR",
   UNREADMESSAGECOUNT = "UNREADMESSAGECOUNT",
+  ADD_MEMBER = "ADD_MEMBER",
 }
 
 export interface UpdateOnlineStatus {
@@ -62,4 +68,9 @@ export interface TypingIndicator {
   userName: string;
   chatId: number;
   isTyping: boolean;
+}
+
+export interface AddMemberToChat {
+  chatId: number;
+  members: UserConversationChatMembers[];
 }

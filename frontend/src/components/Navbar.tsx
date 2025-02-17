@@ -5,10 +5,13 @@ import { Button } from "./ui/button";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ModeToggle } from "./toggle-mode";
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
 
 function Navbar() {
-  const { UserId, Username } = useAuthStore();
+  const { UserId, Username, authenticated, updateAuth } = useAuthStore();
   const { disconnect } = useWebSocketStore();
+  const navigate = useNavigate();
 
   async function handleLogout() {
     const response = await axios.get(
@@ -17,9 +20,22 @@ function Navbar() {
         withCredentials: true,
       }
     );
-    disconnect();
-    console.log(response);
+
+    console.log(response.status);
+    if (response.status === 200) {
+      updateAuth({
+        authenticated: false,
+        UserEmail: null,
+        UserId: null,
+        Username: null,
+      });
+      disconnect();
+    }
   }
+
+  useEffect(() => {
+    navigate("/login");
+  }, [authenticated]);
 
   return (
     <div className="flex items-center justify-between px-6 py-3">

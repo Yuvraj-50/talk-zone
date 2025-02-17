@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { MessageType } from "../types";
 import { WebSocketExt } from "../types/ws";
+import { useAuthStore } from "./authStore";
 
 interface WebSocketState {
   socket: WebSocket | null;
@@ -53,6 +54,9 @@ const useWebSocketStore = create<WebSocketState & WebSocketAction>(
     const messageHandlers: Map<string, (data: any) => void> = new Map();
 
     const reconnect = (url: string) => {
+      const userAuthenticated = useAuthStore.getState().authenticated;
+      if (!userAuthenticated) return;
+
       const { reconnectTimeout } = get();
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout);

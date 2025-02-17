@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 interface AdduseritemProps {
@@ -5,24 +6,32 @@ interface AdduseritemProps {
   userEmail?: string;
   userImage?: string;
   existinguser?: boolean;
+  className?: string;
+  avatarFallBack?: JSX.Element;
   onClick?: () => void;
 }
 
 function Adduseritem({
+  className,
   userEmail,
   userImage,
   userName,
   onClick,
   existinguser,
+  avatarFallBack,
 }: AdduseritemProps) {
   return (
     <div
-      className="flex hover:bg-secondary items-center border-b mt-3 rounded-r-lg gap-3 p-2 cursor-pointer"
+      className={cn("flex items-center mt-3 rounded-r-lg gap-3 p-2", className)}
       onClick={onClick}
     >
       <Avatar className="h-8 w-8 border border-primary flex justify-center items-center">
         <AvatarImage src={userImage} />
-        <AvatarFallback>{userName[0].toUpperCase()}</AvatarFallback>
+        <AvatarFallback>
+          {avatarFallBack
+            ? avatarFallBack
+            : (userName && userName[0].toUpperCase()) ?? "-"}
+        </AvatarFallback>
       </Avatar>
 
       <div>

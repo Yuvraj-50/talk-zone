@@ -6,6 +6,7 @@ import useActiveChatStore from "../../zustand/activeChatStore";
 import { ScrollArea } from "../ui/scroll-area";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./MessageSkeleton";
+import MessageAreaHeader from "./header";
 
 function MessageArea({ messageLoading }: { messageLoading: any }) {
   const { messages } = useMessagesStore();
@@ -13,7 +14,6 @@ function MessageArea({ messageLoading }: { messageLoading: any }) {
   const { typingUsers } = useChatStore();
   const { activechatId, activeChatName } = useActiveChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);
-
   const typingMessage = (typingUsers[activechatId] || []).join("");
 
   useEffect(() => {
@@ -38,9 +38,10 @@ function MessageArea({ messageLoading }: { messageLoading: any }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="sticky top-0 z-10 border-b p-4 shadow-md bg-background">
-        <h2 className="font-medium text-lg">{activeChatName}</h2>
-      </div>
+      <MessageAreaHeader
+        activeChatName={activeChatName}
+        activeChatId={activechatId}
+      />
       <ScrollArea className="flex-1 p-4">
         <div className="flex flex-col space-y-4">
           {messages.map((message) => {

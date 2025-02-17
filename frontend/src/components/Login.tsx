@@ -1,121 +1,156 @@
 import axios from "axios";
-import { FormEvent, useState } from "react";
-import { Link } from "react-router";
+import { FormEvent, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 
 type FormStateType = {
   email: string;
   password: string;
 };
 
-export default function Login() {
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { useAuthStore } from "@/zustand/authStore";
+import { AuthResponse } from "@/types";
+
+function LoginForm({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
   const [formState, setFormState] = useState<FormStateType>({
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const { updateAuth, authenticated } = useAuthStore();
+
+  function handleStateUpdate(e: React.ChangeEvent<HTMLInputElement>) {
+    const key = e.target.type;
+    setFormState((prev) => {
+      return { ...prev, [key]: e.target.value };
+    });
+  }
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const response = await axios.post(
-      "http://localhost:9000/api/v1/auth/login",
-      {
-        email: formState.email,
-        password: formState.password,
-      },
-      { withCredentials: true }
-    );
 
-    console.log(response);
+    if (!formState.email || !formState.password) {
+      return;
+    }
 
-    setFormState({ email: "", password: "" });
+    try {
+      setLoading(true);
+      const response = await axios.post<AuthResponse>(
+        "http://localhost:9000/api/v1/auth/login",
+        {
+          email: formState.email,
+          password: formState.password,
+        },
+        { withCredentials: true }
+      );
+
+      setFormState({ email: "", password: "" });
+
+      const { user } = response.data;
+
+      if (user) {
+        updateAuth({
+          Username: user?.name,
+          UserEmail: user?.email,
+          UserId: user?.id,
+          authenticated: true,
+        });
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log("Invalid userName or password");
+    }
   }
 
-  return (
-    <>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
+  useEffect(() => {
+    if (authenticated) {
+      navigate("/");
+    }
+  }, [authenticated]);
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form onSubmit={handleLogin} method="POST" className="space-y-6">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  value={formState.email}
-                  onChange={(e) =>
-                    setFormState({ ...formState, email: e.target.value })
-                  }
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin}>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
                   id="email"
-                  name="email"
                   type="email"
+                  placeholder="m@example.com"
                   required
-                  autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={formState.email}
+                  onChange={handleStateUpdate}
                 />
               </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm/6 font-medium text-gray-900"
-                >
-                  Password
-                </label>
-                {/* <div className="text-sm">
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
                   <a
                     href="#"
-                    className="font-semibold text-indigo-600 hover:text-indigo-500"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot password?
+                    Forgot your password?
                   </a>
-                </div> */}
-              </div>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  onChange={(e) =>
-                    setFormState({ ...formState, password: e.target.value })
-                  }
+                </div>
+                <Input
                   value={formState.password}
-                  name="password"
+                  onChange={handleStateUpdate}
+                  id="password"
                   type="password"
                   required
-                  autoComplete="current-password"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
-            </div>
+              {loading ? (
+                <Button disabled={true} className="w-full">
+                  loading..
+                </Button>
+              ) : (
+                <Button type="submit" className="w-full">
+                  Login
+                </Button>
+              )}
 
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Sign In
-              </button>
+              <Button variant="outline" className="w-full">
+                Login with Google
+              </Button>
             </div>
-
-            <div className="flex justify-end">
-              <Link
-                to="/signup"
-                className="text-sm/6 font-semibold text-indigo-500 underline"
-              >
-                dont have a account
+            <div className="mt-4 text-center text-sm">
+              Don&apos;t have an account?
+              <Link to="/signup" className="underline underline-offset-4">
+                Sign up
               </Link>
             </div>
           </form>
-        </div>
-      </div>
-    </>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
+
+export default LoginForm;

@@ -10,6 +10,7 @@ import useActiveChatStore from "../zustand/activeChatStore";
 import changeChat from "../lib";
 import { useAuthStore } from "../zustand/authStore";
 import {
+  AddMemberToChat,
   ChatMessage,
   MessageType,
   TypingIndicator,
@@ -21,6 +22,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "./ui/resizable";
+import NoChatSelected from "./NoChatSelected";
 
 interface CreateChatPayload extends UserConversation {
   createdBy: number;
@@ -42,6 +44,7 @@ function ChatDashboard() {
     setTypingUser,
     removeTypingUser,
     updateUnreadCount,
+    addMemberToChat,
   } = useChatStore();
 
   useEffect(() => {
@@ -107,6 +110,13 @@ function ChatDashboard() {
         removeTypingUser(message.chatId, message.userName);
       }
     });
+
+    registerMessageHandler(
+      MessageType.ADD_MEMBER,
+      (message: AddMemberToChat) => {
+        addMemberToChat(message.chatId, message.members);
+      }
+    );
   }, [activechatId, socket, chats]);
 
   return (
@@ -136,7 +146,11 @@ function ChatDashboard() {
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={70} className="flex flex-col">
-          <MessageArea messageLoading={messageLoading} />
+          {activechatId ? (
+            <MessageArea messageLoading={messageLoading} />
+          ) : (
+            <NoChatSelected />
+          )}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
