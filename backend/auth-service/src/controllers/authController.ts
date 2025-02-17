@@ -70,7 +70,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const jwtPayload : JWTPAYLOAD = {
+    const jwtPayload: JWTPAYLOAD = {
       id: user.id,
       email: user.email,
       name: user.name,
@@ -86,7 +86,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       sameSite: "lax",
     });
 
-    res.status(200).json({ message: "Login successful" });
+    res.status(200).json({ msg: "login success", user: jwtPayload });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
