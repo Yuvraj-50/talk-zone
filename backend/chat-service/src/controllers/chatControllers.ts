@@ -253,7 +253,8 @@ export async function GetChatMessages(req: Request, res: Response) {
         SELECT "Messages".*, "ChatMembers"."userId", "ChatMembers"."userName", "ChatMembers"."role"
         FROM "Messages"
         JOIN "ChatMembers" ON "Messages"."senderId" = "ChatMembers"."userId"
-        WHERE "Messages"."chatId" = ${chatId} and "ChatMembers"."chatId" = ${chatId};   
+        WHERE "Messages"."chatId" = ${chatId} and "ChatMembers"."chatId" = ${chatId}
+        ORDER BY "Messages"."sent_at" ASC; 
       `;
     res.json(messages);
   } catch (error) {

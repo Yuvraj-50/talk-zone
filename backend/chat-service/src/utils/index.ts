@@ -7,6 +7,10 @@ export async function fetchAllGroupMembers(groupId: number) {
     },
     select: {
       userId: true,
+      userEmail: true,
+      userName: true,
+      role: true,
+      joined_at: true,
     },
   });
 

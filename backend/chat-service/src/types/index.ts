@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { string, z } from "zod";
 
 export enum MessageType {
@@ -8,6 +9,7 @@ export enum MessageType {
   AUTH_STATUS = "AUTH_STATUS",
   ERROR = "ERROR",
   UNREADMESSAGECOUNT = "UNREADMESSAGECOUNT",
+  ADD_MEMBER = "ADD_MEMBER",
 }
 
 export interface JWTPAYLOAD {
@@ -21,20 +23,34 @@ export enum CHATTYPE {
   "GROUPCHAT" = "GROUPCHAT",
 }
 
+export interface ChatMembers {
+  userId: number;
+  userName: string;
+  role: Role;
+  joined_at: Date;
+  userEmail: string;
+}
+
+export type GroupMembers = {
+  userId: number;
+};
+
 const sendMessageDataSchema = z.object({
   message: z.string(),
   groupId: z.number(),
 });
 
+const memberSchema = z.array(
+  z.object({
+    userId: z.number(),
+    userName: z.string(),
+    userEmail: z.string(),
+  })
+);
+
 const createChatDataSchema = z
   .object({
-    members: z.array(
-      z.object({
-        userId: z.number(),
-        userName: z.string(),
-        userEmail: z.string(),
-      })
-    ),
+    members: memberSchema,
     chatType: z.nativeEnum(CHATTYPE),
     groupName: z.string().nullable(),
     createrId: z.number(),
@@ -57,6 +73,11 @@ const unReadMsgCountSchema = z.object({
   chatId: z.number(),
 });
 
+const addMemberToGroupSchema = z.object({
+  chatId: z.number(),
+  members: memberSchema,
+});
+
 export const UserSocketMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(MessageType.SEND_MESSAGE),
@@ -76,6 +97,11 @@ export const UserSocketMessageSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(MessageType.UNREADMESSAGECOUNT),
     data: unReadMsgCountSchema,
+  }),
+
+  z.object({
+    type: z.literal(MessageType.ADD_MEMBER),
+    data: addMemberToGroupSchema,
   }),
 ]);
 

@@ -1,17 +1,14 @@
 import { Prisma } from "@prisma/client";
-import { CHATTYPE, MessageType, UserSocketMessage } from "../types";
+import {
+  ChatMembers,
+  CHATTYPE,
+  MessageType,
+  UserSocketMessage,
+} from "../types";
 import prisma from "../utils/prismaClient";
 import { BaseMessageHandler, BaseMessageType } from "./BaseMessagehandler";
 import { Role } from "@prisma/client";
 import RedisStore from "../redis/redisStore";
-
-interface ChatMembers {
-  userId: number;
-  userName: string;
-  role: Role;
-  joined_at: Date;
-  userEmail: string;
-}
 
 interface CreateChatTye extends BaseMessageType {
   data: {
@@ -116,8 +113,6 @@ class CreateChatHandler extends BaseMessageHandler {
             },
           },
         });
-        
-        console.log(existingChat);
 
         if (existingChat) {
           throw new Error(

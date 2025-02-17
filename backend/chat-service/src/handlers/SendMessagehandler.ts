@@ -1,4 +1,4 @@
-import { MessageType } from "../types";
+import { GroupMembers, MessageType } from "../types";
 import prisma from "../utils/prismaClient";
 import { BaseMessageHandler, BaseMessageType } from "./BaseMessagehandler";
 
@@ -9,9 +9,6 @@ interface SendMessageType extends BaseMessageType {
   };
 }
 
-type GroupMembers = {
-  userId: number;
-};
 
 export class SendMessageHandler extends BaseMessageHandler {
   async handle(payload: SendMessageType, userId: number): Promise<void> {
@@ -27,9 +24,9 @@ export class SendMessageHandler extends BaseMessageHandler {
       data: storedMessage,
     };
 
-    await this.increaseMessageCnt(groupId, userId, groupMembers);
-
     this.broadCastToGroup(JSON.stringify(messagePayload), groupMembers);
+
+    await this.increaseMessageCnt(groupId, userId, groupMembers);
   }
 
   async getGroupMembers(groupId: number) {

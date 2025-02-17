@@ -5,6 +5,7 @@ import { MessageType, UserSocketMessageSchema } from "../types";
 import CreateChatHandler from "../handlers/CreateChathandler";
 import TypingIndicatorHandler from "../handlers/TypingIndicatorhandler";
 import UnreadMsgHandler from "../handlers/UnreadMsgHandler";
+import AddMemberToGroup from "../handlers/AddMemberToGroupHandler";
 
 class MessageManager {
   private static instance: MessageManager | null = null;
@@ -16,6 +17,7 @@ class MessageManager {
     this.handlers.set(MessageType.CREATE_CHAT, new CreateChatHandler());
     this.handlers.set(MessageType.TYPING, new TypingIndicatorHandler());
     this.handlers.set(MessageType.UNREADMESSAGECOUNT, new UnreadMsgHandler());
+    this.handlers.set(MessageType.ADD_MEMBER, new AddMemberToGroup());
   }
 
   static getInstance(): MessageManager {
