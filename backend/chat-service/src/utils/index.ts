@@ -33,3 +33,11 @@ export async function storeMsgInDb(
     },
   });
 }
+
+export const parseCookies = (cookieString: string) => {
+  return cookieString.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = decodeURIComponent(value);
+    return acc;
+  }, {} as Record<string, string>);
+};

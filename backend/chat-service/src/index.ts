@@ -4,6 +4,8 @@ import UserManager from "./managers/userManager";
 import MessageManager from "./managers/messageManager";
 import startServer from "./server";
 import { validateAuth } from "./utils/validateAuth";
+import cookieParser from "cookie-parser";
+import { parseCookies } from "./utils";
 
 const HEARTBEAT_INTERVAL = 1000 * 20; // EVERY 20 SECONDS
 const HEARTBEAT_VALUE = 1;
@@ -19,9 +21,9 @@ function ping(ws: WebSocket) {
 wss.on("connection", async (ws: WebSocket, req: Request) => {
   ws.on("error", console.error);
 
-  const token = req.headers.cookie?.split("=")[1];
+  const cookies = parseCookies(req.headers.cookie || "");
 
-  const [validateToken, userDetail] = validateAuth(token);
+  const [validateToken, userDetail] = validateAuth(cookies.jwt);
 
   if (!validateToken || !userDetail) {
     const payload = {
