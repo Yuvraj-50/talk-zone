@@ -26,7 +26,7 @@ function Adduseritem({
       onClick={onClick}
     >
       <Avatar className="h-8 w-8 border border-primary flex justify-center items-center">
-        <AvatarImage src={userImage} />
+        <AvatarImage className="w-10 h-10 rounded-full" src={userImage} />
         <AvatarFallback>
           {avatarFallBack
             ? avatarFallBack

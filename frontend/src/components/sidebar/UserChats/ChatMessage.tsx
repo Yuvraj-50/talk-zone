@@ -42,7 +42,11 @@ const Conversation = ({
       <div className="flex items-center gap-4 w-full">
         <div className="relative">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={profilePic} alt={chatName} />
+            <AvatarImage
+              className="w-10 h-10 rounded-full"
+              src={profilePic}
+              alt={chatName}
+            />
             <AvatarFallback> {chatName[0].toUpperCase()} </AvatarFallback>
           </Avatar>
 

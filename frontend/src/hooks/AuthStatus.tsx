@@ -2,14 +2,9 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "../zustand/authStore";
-import { AuthResponse } from "../types";
+import { AuthResponse } from "@/types";
 
 export const useAuth = () => {
-  // const [auth, setAuth] = useState<AuthResponse>({
-  //   authenticated: false,
-  //   user: null,
-  // });
-
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { updateAuth, authenticated } = useAuthStore();
@@ -24,19 +19,21 @@ export const useAuth = () => {
           }
         );
 
-        const { authenticated, user } = response.data;
+        const { user } = response.data;
 
-        if (authenticated && user) {
+        console.log(user, "hooks");
+
+        if (user) {
           updateAuth({
-            Username: user.name,
-            UserEmail: user.email,
-            UserId: user.id,
-            authenticated: authenticated,
+            user,
+            authenticated: true,
           });
         }
       } catch (err) {
-        // setAuth({ authenticated: false, user: null });
-        console.log(err);
+        updateAuth({
+          user: null,
+          authenticated: false,
+        });
       } finally {
         setLoading(false);
       }

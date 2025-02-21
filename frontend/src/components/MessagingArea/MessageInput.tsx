@@ -12,7 +12,7 @@ function MessageInput() {
   const socket = useWebSocketStore((state) => state.socket);
   const sendMessage = useWebSocketStore((state) => state.sendMessage);
   const activechatId = useActiveChatStore((state) => state.activechatId);
-  const userName = useAuthStore((state) => state.Username);
+  const userName = useAuthStore((state) => state.user?.name);
   const isTypingSent = useRef<boolean>(false);
   const formRef = useRef<HTMLFormElement | null>(null);
 

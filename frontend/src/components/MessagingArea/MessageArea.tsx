@@ -10,7 +10,7 @@ import MessageAreaHeader from "./header";
 
 function MessageArea({ messageLoading }: { messageLoading: any }) {
   const { messages } = useMessagesStore();
-  const { UserId } = useAuthStore();
+  const UserId = useAuthStore((state) => state.user?.id);
   const { typingUsers } = useChatStore();
   const { activechatId, activeChatName } = useActiveChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);

@@ -18,6 +18,7 @@ interface ChatsAction {
     chatId: number,
     chatMembers: UserConversationChatMembers[]
   ) => void;
+  fetchUserProfile : () => void;
 }
 
 export const useChatStore = create<Chats & ChatsAction>()(
@@ -76,6 +77,7 @@ export const useChatStore = create<Chats & ChatsAction>()(
           chat.unreadCount = 0;
         }
       }),
+
     addMemberToChat: (
       chatId: number,
       chatMembers: UserConversationChatMembers[]
@@ -86,5 +88,7 @@ export const useChatStore = create<Chats & ChatsAction>()(
           chat.chatMembers = [...chat.chatMembers, ...chatMembers];
         }
       }),
+
+    fetchUserProfile: () => set((state) => {}),
   }))
 );

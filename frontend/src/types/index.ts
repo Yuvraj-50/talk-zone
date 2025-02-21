@@ -1,12 +1,12 @@
-export type User = {
+export interface User {
   name: string;
   id: number;
   email: string;
-};
+  profileUrl: string;
+}
 
 export interface AuthResponse {
-  authenticated: boolean;
-  user: User | null;
+  user: User;
 }
 
 export enum Role {

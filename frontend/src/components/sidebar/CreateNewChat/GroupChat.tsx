@@ -120,7 +120,7 @@ function GroupChat({
           <div className="flex">
             {memberList.map((member) => (
               <Avatar key={member.userId}>
-                <AvatarImage></AvatarImage>
+                <AvatarImage src=""></AvatarImage>
                 <AvatarFallback>
                   {member.userName[0].toUpperCase()}
                 </AvatarFallback>

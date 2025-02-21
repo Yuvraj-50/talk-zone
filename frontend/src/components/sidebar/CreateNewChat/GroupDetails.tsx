@@ -12,16 +12,16 @@ interface GroupDetailsProps {
 
 function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
   const [groupName, setGroupName] = useState<string>("");
-  const { UserId: myUserId, Username, UserEmail } = useAuthStore();
+  const { user } = useAuthStore();
   const { sendMessage, socket } = useWebSocketStore();
 
   async function handleCreateGroup(e: ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (myUserId && Username && UserEmail) {
+    if (user) {
       memberList.push({
-        userId: myUserId,
-        userName: Username,
-        userEmail: UserEmail,
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
       });
     }
 
@@ -32,7 +32,7 @@ function GroupDetails({ memberList, setMemberList }: GroupDetailsProps) {
           members: memberList,
           chatType: CHATTYPE.GROUPCHAT,
           groupName: groupName,
-          createrId: myUserId,
+          createrId: user?.id,
         },
       };
       sendMessage(payload);

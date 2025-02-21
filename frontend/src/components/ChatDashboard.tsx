@@ -32,7 +32,7 @@ function ChatDashboard() {
   const [messageLoading, setMessageLoading] = useState<boolean>(false);
 
   const { updateMessages } = useMessagesStore();
-  const userId = useAuthStore((state) => state.UserId);
+  const userId = useAuthStore((state) => state.user?.id);
   const { socket, registerMessageHandler, connect, disconnect, sendMessage } =
     useWebSocketStore();
   const { updateActiveChatId, updateActiveChatName, activechatId } =

@@ -1,9 +1,9 @@
 import { Navigate, Outlet, Route } from "react-router-dom";
 import { useAuth } from "../hooks/AuthStatus";
-import Signup from "../components/Signup";
 import { Routes } from "react-router";
 import ChatDashboard from "../components/ChatDashboard";
 import LoginPage from "@/pages/Login";
+import SignUpPage from "@/pages/Signup";
 
 export const ProtectedRoute = ({
   authenticated,
@@ -28,7 +28,7 @@ export const MyRouter = () => {
     <Routes>
       <Route element={<PublicRoutes authenticated={authenticated} />}>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/signup" element={<SignUpPage />} />
       </Route>
 
       <Route element={<ProtectedRoute authenticated={authenticated} />}>

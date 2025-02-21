@@ -1,9 +1,8 @@
+import { User } from "@/types";
 import { create } from "zustand";
 
 type AuthState = {
-  Username: null | string;
-  UserEmail: null | string;
-  UserId: null | number;
+  user: User | null;
   authenticated: boolean;
 };
 
@@ -12,15 +11,8 @@ type AuthAction = {
 };
 
 export const useAuthStore = create<AuthState & AuthAction>()((set) => ({
-  Username: null,
-  UserEmail: null,
-  UserId: null,
+  user: null,
   authenticated: false,
   updateAuth: (auth) =>
-    set({
-      Username: auth.UserEmail,
-      UserEmail: auth.UserEmail,
-      UserId: auth.UserId,
-      authenticated: auth.authenticated,
-    }),
+    set({ user: auth.user, authenticated: auth.authenticated }),
 }));

@@ -15,12 +15,11 @@ import changeChat from "@/lib";
 import { useMessagesStore } from "@/zustand/messageStore";
 import useActiveChatStore from "@/zustand/activeChatStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { Plus } from "lucide-react";
 import Adduseritem from "@/components/Adduseritem";
 
-// TODO: FIX THE USERNAME AND USEREMAIL PROBLEM ASAP
 interface UserDate {
   users: User[];
 }
@@ -33,7 +32,7 @@ function NewChat({ changeStep }: NewChatProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
 
-  const { UserId: myUserId, Username, UserEmail } = useAuthStore();
+  const { user } = useAuthStore();
   const { chats, resetUnreadCount } = useChatStore();
   const { updateMessages } = useMessagesStore();
   const { updateActiveChatId, updateActiveChatName } = useActiveChatStore();
@@ -88,7 +87,7 @@ function NewChat({ changeStep }: NewChatProps) {
           members,
           chatType: CHATTYPE.ONETOONE,
           groupName: null,
-          createrId: myUserId,
+          createrId: user?.id,
         },
       };
       sendMessage(payload);
@@ -98,11 +97,11 @@ function NewChat({ changeStep }: NewChatProps) {
   async function handlecreateNewChat(member: ChatMembers) {
     let otherMembers: ChatMembers[] = [member];
 
-    if (myUserId && Username && UserEmail) {
+    if (user) {
       otherMembers.push({
-        userId: myUserId,
-        userName: Username,
-        userEmail: UserEmail,
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
       });
     }
 
@@ -166,24 +165,32 @@ function NewChat({ changeStep }: NewChatProps) {
       </div>
 
       <ScrollArea className="h-52">
-        {users.map((user) => {
+        {users.map((Eachuser) => {
           const existinguser = findExistingChat([
-            { userId: user.id, userEmail: user.email, userName: user.name },
-            { userId: myUserId!, userEmail: UserEmail!, userName: Username! },
+            {
+              userId: Eachuser.id,
+              userEmail: Eachuser.email,
+              userName: Eachuser.name,
+            },
+            {
+              userId: user?.id!,
+              userEmail: user?.email!,
+              userName: user?.name!,
+            },
           ]);
 
           return (
             <Adduseritem
               className="hover:bg-secondary cursor-pointer"
-              userName={user.name}
-              userEmail={user.email}
+              userName={Eachuser.name}
+              userEmail={Eachuser.email}
               existinguser={existinguser ? true : false}
-              key={user.id}
+              key={Eachuser.id}
               onClick={() =>
                 handlecreateNewChat({
-                  userId: user.id,
-                  userName: user.name,
-                  userEmail: user.email,
+                  userId: Eachuser.id,
+                  userName: Eachuser.name,
+                  userEmail: Eachuser.email,
                 })
               }
             />

@@ -7,7 +7,6 @@ type FormStateType = {
   password: string;
 };
 
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +19,7 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useAuthStore } from "@/zustand/authStore";
+import GoogleSignUp from "./GoogleSignUp";
 import { AuthResponse } from "@/types";
 
 function LoginForm({
@@ -66,9 +66,7 @@ function LoginForm({
 
       if (user) {
         updateAuth({
-          Username: user?.name,
-          UserEmail: user?.email,
-          UserId: user?.id,
+          user,
           authenticated: true,
         });
       }
@@ -136,9 +134,7 @@ function LoginForm({
                 </Button>
               )}
 
-              <Button variant="outline" className="w-full">
-                Login with Google
-              </Button>
+              <GoogleSignUp />
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?

@@ -1,146 +1,231 @@
 import axios from "axios";
-import { FormEvent, useState } from "react";
-import { Link } from "react-router";
+import React, { FormEvent, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 
-type FormStateType = {
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { useAuthStore } from "@/zustand/authStore";
+import { Textarea } from "./ui/textarea";
+import GoogleSignUp from "./GoogleSignUp";
+import { HoverCard, HoverCardTrigger } from "./ui/hover-card";
+import { HoverCardContent } from "@radix-ui/react-hover-card";
+import { AuthResponse } from "@/types";
+
+interface FormStateType {
   email: string;
   password: string;
   name: string;
-};
+  bio: string;
+}
 
-export default function Signup() {
+function SignUpForm({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
   const [formState, setFormState] = useState<FormStateType>({
     email: "",
     password: "",
     name: "",
+    bio: "Typing... probably something unnecessary. 🤪",
   });
 
-  async function handleSignup(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const response = await axios.post(
-      "http://localhost:9000/api/v1/auth/signup",
-      {
-        email: formState.email,
-        password: formState.password,
-        name: formState.name,
-      },
-      { withCredentials: true }
-    );
+  const [image, setImage] = useState<File | null>(null);
 
-    console.log(response);
+  const [loading, setLoading] = useState(false);
 
-    setFormState({ email: "", password: "", name: "" });
+  const navigate = useNavigate();
+  const { updateAuth, authenticated } = useAuthStore();
+
+  function handleStateUpdate(
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
+  ) {
+    const key = e.target.id;
+    if (key == "photo" && e.target instanceof HTMLInputElement) {
+      const file = e.target.files?.[0];
+      if (file) {
+        setImage(file);
+      }
+    }
+
+    setFormState((prev) => {
+      return { ...prev, [key]: e.target.value };
+    });
   }
 
+  async function handleLogin(e: FormEvent<HTMLFormElement>) {
+    if (
+      !formState.email.trim() ||
+      !formState.password.trim() ||
+      !formState.name.trim() ||
+      !formState.bio.trim()
+    ) {
+      return;
+    }
+
+    e.preventDefault();
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("email", formState.email);
+      formData.append("password", formState.password);
+      formData.append("name", formState.name);
+      formData.append("bio", formState.bio);
+      if (image) {
+        formData.append("photo", image);
+      }
+
+      const response = await axios.post<AuthResponse>(
+        "http://localhost:9000/api/v1/auth/signup",
+        formData,
+        { withCredentials: true }
+      );
+
+      setFormState({ email: "", password: "", name: "", bio: "" });
+
+      const { user } = response.data;
+
+      console.log(user);
+
+      if (user) {
+        updateAuth({
+          user,
+          authenticated: true,
+        });
+      }
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log("Error in signup:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (authenticated) {
+      navigate("/");
+    }
+  }, [authenticated]);
+
   return (
-    <>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-            Sign Up to your account
-          </h2>
-        </div>
-
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form onSubmit={handleSignup} method="POST" className="space-y-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                name
-              </label>
-              <div className="mt-2">
-                <input
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Create new Account</CardTitle>
+          <CardDescription>
+            Enter your details below to create your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin}>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
                   id="name"
-                  value={formState.name}
-                  onChange={(e) =>
-                    setFormState({ ...formState, name: e.target.value })
-                  }
-                  name="name"
                   type="text"
+                  placeholder="yuvaraj"
                   required
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={formState.name}
+                  onChange={handleStateUpdate}
                 />
               </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  value={formState.email}
-                  onChange={(e) =>
-                    setFormState({ ...formState, email: e.target.value })
-                  }
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
                   id="email"
-                  name="email"
                   type="email"
+                  placeholder="m@example.com"
                   required
-                  autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  value={formState.email}
+                  onChange={handleStateUpdate}
                 />
               </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm/6 font-medium text-gray-900"
-                >
-                  Password
-                </label>
-                {/* <div className="text-sm">
-                  <a
-                    href="#"
-                    className="font-semibold text-indigo-600 hover:text-indigo-500"
-                  >
-                    Forgot password?
-                  </a>
-                </div> */}
-              </div>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  onChange={(e) =>
-                    setFormState({ ...formState, password: e.target.value })
-                  }
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <p className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+                    Forgot your password?
+                  </p>
+                </div>
+                <Input
                   value={formState.password}
-                  name="password"
+                  onChange={handleStateUpdate}
+                  id="password"
                   type="password"
                   required
-                  autoComplete="current-password"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
-            </div>
+              <div className="grid gap-2">
+                <Label htmlFor="photo">Upload Profile Photo</Label>
+                <Input
+                  onChange={handleStateUpdate}
+                  id="photo"
+                  required
+                  type="file"
+                  accept="image/*"
+                />
 
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Sign In
-              </button>
-            </div>
+                {image && (
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Button variant="link" onClick={() => {}}>
+                        Hover to Preview Image
+                      </Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-44 h-36 z-30">
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt="user profile image"
+                      />
+                    </HoverCardContent>
+                  </HoverCard>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="bio">Bio (optional)</Label>
+                <Textarea
+                  id="bio"
+                  required
+                  value={formState.bio}
+                  onChange={handleStateUpdate}
+                />
+              </div>
+              {loading ? (
+                <Button disabled={true} className="w-full">
+                  Loading...
+                </Button>
+              ) : (
+                <Button type="submit" className="w-full">
+                  Signup
+                </Button>
+              )}
 
-            <div className="flex justify-end">
-              <Link
-                to="/login"
-                className="text-sm/6 font-semibold text-indigo-500 underline"
-              >
-                Already have an account? Login
+              <GoogleSignUp />
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Already have an account?
+              <Link to="/login" className="underline underline-offset-4">
+                Login
               </Link>
             </div>
           </form>
-        </div>
-      </div>
-    </>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
+
+export default SignUpForm;

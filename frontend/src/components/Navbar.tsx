@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 function Navbar() {
-  const { UserId, Username, authenticated, updateAuth } = useAuthStore();
+  const { user, updateAuth, authenticated } = useAuthStore();
   const { disconnect } = useWebSocketStore();
   const navigate = useNavigate();
 
@@ -21,13 +21,10 @@ function Navbar() {
       }
     );
 
-    console.log(response.status);
     if (response.status === 200) {
       updateAuth({
         authenticated: false,
-        UserEmail: null,
-        UserId: null,
-        Username: null,
+        user: null,
       });
       disconnect();
     }
@@ -40,11 +37,15 @@ function Navbar() {
   return (
     <div className="flex items-center justify-between px-6 py-3">
       <div className="flex items-center gap-4">
-        <h1 className="text-lg font-medium">{Username}</h1>
-        <span className="text-sm">ID: {UserId}</span>
+        <h1 className="text-lg font-medium">{user?.name}</h1>
+        <span className="text-sm">ID: {user?.id}</span>
       </div>
       <Avatar>
-        <AvatarImage src="" alt="@shadcn" />
+        <AvatarImage
+          className="w-10 h-10 rounded-full"
+          src={user?.profileUrl}
+          alt="user profile pic"
+        />
         <AvatarFallback>Ys</AvatarFallback>
       </Avatar>
       <ModeToggle />
