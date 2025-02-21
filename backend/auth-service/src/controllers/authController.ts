@@ -2,16 +2,18 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import prismaClient from "../utils/db";
 import { generateToken } from "../utils/generateJwt";
-import jwt, {
-  JwtPayload,
-  VerifyCallback,
-  VerifyErrors,
-  VerifyOptions,
-} from "jsonwebtoken";
+import jwt, { JwtPayload, VerifyCallback, VerifyErrors } from "jsonwebtoken";
 import { JWTPAYLOAD } from "../types";
+import {
+  generateRandomPassword,
+  verifyGoogleToken,
+} from "../utils/verifyGoogleToken";
+import { TokenPayload } from "google-auth-library";
+import { uploadToCloudinary } from "../utils/cloudnary";
+import path from "node:path";
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
-  const { email, name, password } = req.body;
+  const { email, name, password, bio } = req.body;
 
   try {
     const existingUser = await prismaClient.user.findUnique({
@@ -24,15 +26,31 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const profilePhoto = req.file?.filename;
+
+    if (!profilePhoto) return;
+
+    const actualpath = path.resolve(__dirname, "../../uploads", profilePhoto);
+
+    const profilePhotoUrl = await uploadToCloudinary(actualpath);
+
+    if (!profilePhotoUrl) return;
+
     const newUser = await prismaClient.user.create({
-      data: { email, name, password: hashedPassword },
+      data: {
+        email,
+        name,
+        password: hashedPassword,
+        bio: bio,
+        profileUrl: profilePhotoUrl,
+      },
     });
 
-    // TODO MAKE NAME COMPULSARY FIELD IN DB
     const jwtPayload: JWTPAYLOAD = {
       id: newUser.id,
       email: newUser.email,
       name: newUser.name,
+      profileUrl: newUser.profileUrl,
     };
 
     const token = generateToken(jwtPayload);
@@ -74,6 +92,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       id: user.id,
       email: user.email,
       name: user.name,
+      profileUrl: user.profileUrl,
     };
 
     const token = generateToken(jwtPayload);
@@ -93,6 +112,65 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const googleLogin = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      res.status(400).json({ msg: "token is required" });
+      return;
+    }
+
+    const payload: TokenPayload | undefined = await verifyGoogleToken(token);
+
+    if (!payload || !payload.email || !payload.name) {
+      res.status(400).json({ msg: "Invalid token" });
+      return;
+    }
+
+    let existingUser = await prismaClient.user.findUnique({
+      where: { email: payload.email },
+    });
+
+    if (!existingUser) {
+      existingUser = await prismaClient.user.create({
+        data: {
+          email: payload.email,
+          name: payload.name,
+          password: generateRandomPassword(),
+          bio: "hello world",
+          profileUrl: payload.picture ?? "no picture",
+        },
+      });
+    }
+
+    const user: JWTPAYLOAD = {
+      id: existingUser.id,
+      email: existingUser.email,
+      name: existingUser.name,
+      profileUrl: existingUser.profileUrl,
+    };
+
+    const jwtToken = generateToken(user);
+
+    res.cookie("jwt", jwtToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+      secure: false,
+      sameSite: "lax",
+    });
+
+    res.status(200).json({ msg: "Google login successful", user });
+  } catch (error) {
+    console.log("GOOGLE LOGIN ERROR", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const logout = async (req: Request, res: Response): Promise<void> => {
   res.clearCookie("jwt");
   res.status(200).json({ message: "Logged out successfully" });
@@ -105,7 +183,7 @@ export const verifyUser = async (
   const token = req.cookies.jwt;
 
   if (!token) {
-    res.status(401).json({ authenticated: false, user: null });
+    res.status(401).json({ user: null });
     return;
   }
 
@@ -115,15 +193,16 @@ export const verifyUser = async (
       process.env.JWT_SECRET!,
       (err: VerifyErrors | null, user: unknown) => {
         if (err) {
-          res.status(401).json({ authenticated: false, user: null });
+          res.status(401).json({ user: null });
           return;
         }
         const payload = user as JWTPAYLOAD;
-        res.json({ authenticated: true, user: payload });
+
+        res.json({ user: payload });
       }
     );
   } catch (err) {
-    res.status(401).json({ authenticated: false, user: null });
+    res.status(401).json({ user: null });
   }
 };
 
@@ -146,6 +225,7 @@ export const getuser = async (req: Request, res: Response): Promise<void> => {
         name: true,
         id: true,
         email: true,
+        profileUrl: true,
       },
     });
 
