@@ -28,6 +28,7 @@ type createChatData = {
     joined_at: Date;
     isOnline: boolean;
   }[];
+  profilePicture: string | null;
 };
 
 // export async function CreateChat(req: Request, res: Response) {
@@ -172,8 +173,23 @@ export async function GetChat(req: Request, res: Response) {
             count: true,
           },
         },
+        messages: {
+          select: {
+            message: true,
+            sent_at: true,
+            senderId: true,
+          },
+          take: 1,
+          orderBy: {
+            sent_at: "desc",
+          },
+        },
       },
     });
+
+    console.log(chats);
+
+    // TODO: SEND MESSAGES AND TIMESTAMP TO THE FRONTEND
 
     const formattedChats: createChatData[] = [];
 
@@ -190,6 +206,7 @@ export async function GetChat(req: Request, res: Response) {
         chatId: chat.id,
         chatName: chat.name ?? otherUser?.userName ?? "unkonwnChat",
         chatType: chat.name ? CHATTYPE.GROUPCHAT : CHATTYPE.ONETOONE,
+        profilePicture: chat.profilePic,
         createdBy: chat.createdBy,
         chatMembers: chatmemeberswithstatus,
         unreadCount:

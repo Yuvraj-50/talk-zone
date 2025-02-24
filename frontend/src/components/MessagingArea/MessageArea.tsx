@@ -8,11 +8,11 @@ import MessageInput from "./MessageInput";
 import MessageSkeleton from "./MessageSkeleton";
 import MessageAreaHeader from "./header";
 
-function MessageArea({ messageLoading }: { messageLoading: any }) {
+function MessageArea({ messageLoading }: { messageLoading: boolean }) {
   const { messages } = useMessagesStore();
   const UserId = useAuthStore((state) => state.user?.id);
   const { typingUsers } = useChatStore();
-  const { activechatId, activeChatName } = useActiveChatStore();
+  const activechatId = useActiveChatStore((state) => state.activechatId);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingMessage = (typingUsers[activechatId] || []).join("");
 
@@ -38,10 +38,7 @@ function MessageArea({ messageLoading }: { messageLoading: any }) {
 
   return (
     <div className="flex flex-col h-full">
-      <MessageAreaHeader
-        activeChatName={activeChatName}
-        activeChatId={activechatId}
-      />
+      <MessageAreaHeader />
       <ScrollArea className="flex-1 p-4">
         <div className="flex flex-col space-y-4">
           {messages.map((message) => {

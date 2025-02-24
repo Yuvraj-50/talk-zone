@@ -1,4 +1,3 @@
-import { FaRegUserCircle } from "react-icons/fa";
 import { CHATTYPE } from "../../../types";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

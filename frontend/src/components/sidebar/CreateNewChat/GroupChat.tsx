@@ -55,6 +55,11 @@ function GroupChat({
     return alreadyMember.find((member) => member.userId == id) ? true : false;
   }
 
+  function isMemberPresent(id: number): boolean {
+    if (!memberList) return false;
+    return memberList.find((member) => member.userId == id) ? true : false;
+  }
+
   useEffect(() => {
     if (search === "") {
       setUsers([]);
@@ -94,6 +99,7 @@ function GroupChat({
           <div key={user.id} className="flex items-center">
             <label htmlFor={user.email}>
               <Adduseritem
+                userImage={user.profileUrl}
                 className="cursor-pointer"
                 userName={user.name}
                 userEmail={user.email}
@@ -101,7 +107,9 @@ function GroupChat({
             </label>
             <Checkbox
               disabled={isUserAlreadyMember(user.id)}
-              defaultChecked={isUserAlreadyMember(user.id)}
+              defaultChecked={
+                isUserAlreadyMember(user.id) || isMemberPresent(user.id)
+              }
               id={user.email}
               onCheckedChange={(checked) => {
                 if (checked) {

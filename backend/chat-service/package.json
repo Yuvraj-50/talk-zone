@@ -28,6 +28,7 @@
     "@types/redis": "^4.0.10",
     "@types/ws": "^8.5.13",
     "axios": "^1.7.9",
+    "cloudinary": "^2.5.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

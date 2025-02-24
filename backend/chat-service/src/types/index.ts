@@ -16,6 +16,7 @@ export interface JWTPAYLOAD {
   id: number;
   email: string;
   name: string;
+  profileUrl: string;
 }
 
 export enum CHATTYPE {
@@ -26,8 +27,6 @@ export enum CHATTYPE {
 export interface ChatMembers {
   userId: number;
   userName: string;
-  role: Role;
-  joined_at: Date;
   userEmail: string;
 }
 
@@ -48,12 +47,13 @@ const memberSchema = z.array(
   })
 );
 
-const createChatDataSchema = z
+export const createChatDataSchema = z
   .object({
     members: memberSchema,
     chatType: z.nativeEnum(CHATTYPE),
     groupName: z.string().nullable(),
     createrId: z.number(),
+    profilePicture: z.string().optional().nullable(),
   })
   .refine((data) => {
     if (data.chatType === CHATTYPE.ONETOONE) {

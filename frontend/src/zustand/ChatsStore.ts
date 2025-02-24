@@ -18,11 +18,12 @@ interface ChatsAction {
     chatId: number,
     chatMembers: UserConversationChatMembers[]
   ) => void;
-  fetchUserProfile : () => void;
+  // fetchUserProfile: (chatIds: number[]) => void;
+  // updateProfileAndBio: (users: UpdateProfileAndBio[]) => void;
 }
 
 export const useChatStore = create<Chats & ChatsAction>()(
-  immer((set) => ({
+  immer((set, get) => ({
     chats: [],
     typingUsers: {},
 
@@ -89,6 +90,35 @@ export const useChatStore = create<Chats & ChatsAction>()(
         }
       }),
 
-    fetchUserProfile: () => set((state) => {}),
+    // fetchUserProfile: (chatIds: number[]) =>
+    //   set(async () => {
+    //     const response = await axios.post<{ users: UpdateProfileAndBio[] }>(
+    //       "http://localhost:9000/api/v1/auth/userProfiles",
+    //       { users: chatIds },
+    //       { withCredentials: true }
+    //     );
+
+    //     get().updateProfileAndBio(response.data.users);
+    //   }),
+
+    // updateProfileAndBio: (users: UpdateProfileAndBio[]) =>
+    //   set((state) => {
+    //     state.chats.forEach((chat) => {
+    //       if (chat.profilePicture == null) {
+    //         const user = useAuthStore.getState().user;
+    //         if (user && user.id) {
+    //           const profilePicture = evalActiveChatProfile(chat, user.id);
+    //           chat.profilePicture = profilePicture;
+    //         }
+    //       }
+    //       chat.chatMembers.forEach((member) => {
+    //         const userUpdate = users.find((user) => user.id === member.userId);
+    //         if (userUpdate) {
+    //           member.profilePicture = userUpdate.profileUrl;
+    //           member.bio = userUpdate.bio;
+    //         }
+    //       });
+    //     });
+    //   }),
   }))
 );

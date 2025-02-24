@@ -11,6 +11,13 @@ import {
 import { TokenPayload } from "google-auth-library";
 import { uploadToCloudinary } from "../utils/cloudnary";
 import path from "node:path";
+import prisma from "../utils/db";
+
+interface UpdateProfileAndBio {
+  id: number;
+  profileUrl: string;
+  bio: string;
+}
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   const { email, name, password, bio } = req.body;
@@ -235,5 +242,26 @@ export const getuser = async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getUserProfile = async (req: Request, res: Response) => {
+  const { users } = req.body;
+
+  try {
+    const usersPromise = users.map((user: number) => {
+      return prisma.user.findUnique({
+        where: { id: user },
+        select: {
+          profileUrl: true,
+          id: true,
+          bio: true,
+        },
+      });
+    });
+    const result: UpdateProfileAndBio[] = await Promise.all(usersPromise);
+    res.status(200).json({ users: result });
+  } catch (error) {
+    res.status(500).json({ msg: "internal server error" });
   }
 };

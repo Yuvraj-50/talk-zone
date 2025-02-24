@@ -13,10 +13,9 @@ import { Button } from "../ui/button";
 import { Sheet } from "../ui/sheet";
 import useWebSocketStore from "@/zustand/socketStore";
 import { useToast } from "@/hooks/use-toast";
+import useActiveChatStore from "@/zustand/activeChatStore";
 
 interface MessageAreaHeaderProps {
-  activeChatName: string;
-  activeChatId: number;
   className?: string;
   onClick?: () => void;
 }
@@ -26,19 +25,16 @@ const sideBarItems = [
   { icon: <User />, title: "ChatMembers" },
 ];
 
-function MessageAreaHeader({
-  activeChatName,
-  activeChatId,
-  className,
-  onClick,
-}: MessageAreaHeaderProps) {
+function MessageAreaHeader({ className, onClick }: MessageAreaHeaderProps) {
   const [itemSelected, setItemSelected] = useState<string>("Overview");
   const [memberList, setMemberList] = useState<ChatMembers[]>([]);
   const [currStep, setCurrStep] = useState(1);
   const [isPopOver, setIsPopOver] = useState(false);
 
+  const { activeChatName, activechatId, activeChatPicture } =
+    useActiveChatStore();
   const chats = useChatStore((state) => state.chats);
-  const activeChatMembers = chats.find((chat) => chat.chatId === activeChatId);
+  const activeChatMembers = chats.find((chat) => chat.chatId === activechatId);
   const alreadyMembers = useRef(activeChatMembers?.chatMembers).current;
   const { socket, sendMessage } = useWebSocketStore();
 
@@ -48,7 +44,7 @@ function MessageAreaHeader({
     const payload = {
       type: MessageType.ADD_MEMBER,
       data: {
-        chatId: activeChatId,
+        chatId: activechatId,
         members: memberList,
       },
     };
@@ -83,6 +79,7 @@ function MessageAreaHeader({
               userName={activeChatName}
               onClick={onClick}
               className="w-full"
+              userImage={activeChatPicture}
             />
           </div>
         </PopoverTrigger>
@@ -136,6 +133,7 @@ function MessageAreaHeader({
                         key={member.userId}
                         userName={member.userName}
                         userEmail={member.userEmail}
+                        userImage={member.profilePicture}
                       />
                     ))}
                   </>

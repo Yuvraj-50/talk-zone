@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getuser,
+  getUserProfile,
   googleLogin,
   login,
   logout,
@@ -22,5 +23,7 @@ router.get("/status", verifyUser);
 router.get("/getUsers/:name", getuser);
 
 router.post("/googleLogin", googleLogin);
+
+router.post("/userProfiles", getUserProfile);
 
 export default router;

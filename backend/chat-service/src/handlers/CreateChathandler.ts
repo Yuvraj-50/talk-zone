@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import {
   ChatMembers,
   CHATTYPE,
+  createChatDataSchema,
   MessageType,
   UserSocketMessage,
 } from "../types";
@@ -9,14 +10,12 @@ import prisma from "../utils/prismaClient";
 import { BaseMessageHandler, BaseMessageType } from "./BaseMessagehandler";
 import { Role } from "@prisma/client";
 import RedisStore from "../redis/redisStore";
+import { z } from "zod";
+import fs from "fs";
+import { uploadToCloudinary } from "../utils/cloudnary";
 
 interface CreateChatTye extends BaseMessageType {
-  data: {
-    members: ChatMembers[];
-    chatType: CHATTYPE;
-    groupName: string | null;
-    createrId: number;
-  };
+  data: z.infer<typeof createChatDataSchema>;
 }
 
 interface ClientPayloadChatMembers extends ChatMembers {
@@ -33,6 +32,7 @@ interface ClientResPayload {
     createdBy: number | null;
     chatType: CHATTYPE;
     unreadCount: number;
+    profilePicture: string | null;
   };
 }
 
@@ -41,11 +41,21 @@ class CreateChatHandler extends BaseMessageHandler {
     const type = payload.type as MessageType;
     const chatdata = payload.data;
 
+    let profilePictureUrl = null;
+    if (chatdata.profilePicture) {
+      try {
+        profilePictureUrl = await uploadToCloudinary(chatdata.profilePicture);
+      } catch (error) {
+        console.error("Failed to upload profile picture:", error);
+      }
+    }
+
     const createdChat = await this.createChat(
       chatdata.createrId,
       chatdata.groupName,
       chatdata.members,
-      chatdata.chatType
+      chatdata.chatType,
+      profilePictureUrl
     );
 
     if (!createdChat) return;
@@ -62,6 +72,7 @@ class CreateChatHandler extends BaseMessageHandler {
         message: "Chat created successfully",
         chatType: chatdata.chatType,
         unreadCount: 0,
+        profilePicture: createdChat.profilePicture,
       },
     };
 
@@ -100,9 +111,12 @@ class CreateChatHandler extends BaseMessageHandler {
     createrId: number,
     name: null | string,
     chatMembers: ChatMembers[],
-    chatType: CHATTYPE
+    chatType: CHATTYPE,
+    profilePicture: string | null
   ) {
     try {
+      console.log(profilePicture);
+
       if (chatType == CHATTYPE.ONETOONE) {
         const existingChat = await prisma.chats.findFirst({
           where: {
@@ -125,6 +139,7 @@ class CreateChatHandler extends BaseMessageHandler {
         data: {
           createdBy: createrId,
           name: name,
+          profilePic: profilePicture,
         },
       });
 
@@ -158,6 +173,7 @@ class CreateChatHandler extends BaseMessageHandler {
         members: res,
         chatName,
         createdBy: createChat.createdBy,
+        profilePicture: createChat.profilePic,
       };
     } catch (error) {
       console.log("Error while creating chat", error);

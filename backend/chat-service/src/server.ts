@@ -4,13 +4,14 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import express, { json } from "express";
 import { Express } from "express";
+import { configureCloudinary } from "./utils/cloudnary";
 
 dotenv.config();
 
 function startServer() {
   const app: Express = express();
 
-  const PORT : Number = Number(process.env.PORT) || 3000;
+  const PORT: Number = Number(process.env.PORT) || 3000;
 
   app.use(
     cors({
@@ -32,6 +33,7 @@ function startServer() {
 
   const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    configureCloudinary();
   });
 
   return server;

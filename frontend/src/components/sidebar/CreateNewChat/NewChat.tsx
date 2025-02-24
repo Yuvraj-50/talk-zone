@@ -26,16 +26,18 @@ interface UserDate {
 
 interface NewChatProps {
   changeStep: Dispatch<SetStateAction<number>>;
+  setIsPopOverOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-function NewChat({ changeStep }: NewChatProps) {
+function NewChat({ changeStep, setIsPopOverOpen }: NewChatProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [search, setSearch] = useState<string>("");
 
   const { user } = useAuthStore();
   const { chats, resetUnreadCount } = useChatStore();
   const { updateMessages } = useMessagesStore();
-  const { updateActiveChatId, updateActiveChatName } = useActiveChatStore();
+  const { updateActiveChatId, updateActiveChatName, updateActiveChatPicture } =
+    useActiveChatStore();
   const { socket, sendMessage } = useWebSocketStore();
 
   function findExistingChat(chatMembers: ChatMembers[]) {
@@ -63,6 +65,7 @@ function NewChat({ changeStep }: NewChatProps) {
     updateMessages([]);
     updateActiveChatId(chat.chatId);
     updateActiveChatName(chat.chatName);
+    updateActiveChatPicture(chat.profilePicture);
     const messages = await changeChat(chat.chatId);
     resetUnreadCount(chat.chatId);
     updateMessages(messages);
@@ -119,6 +122,8 @@ function NewChat({ changeStep }: NewChatProps) {
       createNewChat(otherMembers);
       console.log("new chate created");
     }
+
+    setIsPopOverOpen(false);
   }
 
   useEffect(() => {
@@ -185,6 +190,7 @@ function NewChat({ changeStep }: NewChatProps) {
               userName={Eachuser.name}
               userEmail={Eachuser.email}
               existinguser={existinguser ? true : false}
+              userImage={Eachuser.profileUrl}
               key={Eachuser.id}
               onClick={() =>
                 handlecreateNewChat({

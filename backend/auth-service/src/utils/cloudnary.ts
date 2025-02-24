@@ -4,19 +4,23 @@ export function hello() {
   console.log(cloudinary.config().cloud_name);
 }
 
-export async function uploadToCloudinary(photo: string) {
+export async function uploadToCloudinary(
+  photo: string,
+  folder: string = "chat-profiles"
+): Promise<string> {
   try {
-    const result: UploadApiResponse = await cloudinary.uploader.upload(photo, {
+    const result = await cloudinary.uploader.upload(photo, {
+      folder,
       public_id: "photo",
     });
 
-    const optimizeUrl = cloudinary.url("photo", {
+    const optimizedUrl = cloudinary.url(result.public_id, {
       fetch_format: "auto",
       quality: "auto",
     });
 
-    return optimizeUrl;
+    return optimizedUrl;
   } catch (error) {
-    console.log("error", JSON.stringify(error, null, 2));
+    throw error;
   }
 }

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
-import CreateChat from "./sidebar/CreateNewChat/CreateChat";
 import ChatUsers from "./sidebar/UserChats/ChatUsers";
 import { useMessagesStore } from "../zustand/messageStore";
 import MessageArea from "./MessagingArea/MessageArea";
@@ -23,20 +22,25 @@ import {
   ResizablePanelGroup,
 } from "./ui/resizable";
 import NoChatSelected from "./NoChatSelected";
-
-interface CreateChatPayload extends UserConversation {
-  createdBy: number;
-}
+import {
+  fetchUserProfile,
+  getUserIds,
+  processUserProfileAndBio,
+} from "@/lib/utils";
 
 function ChatDashboard() {
   const [messageLoading, setMessageLoading] = useState<boolean>(false);
 
-  const { updateMessages } = useMessagesStore();
+  const updateMessages = useMessagesStore((state) => state.updateMessages);
   const userId = useAuthStore((state) => state.user?.id);
   const { socket, registerMessageHandler, connect, disconnect, sendMessage } =
     useWebSocketStore();
-  const { updateActiveChatId, updateActiveChatName, activechatId } =
-    useActiveChatStore();
+  const {
+    updateActiveChatId,
+    updateActiveChatName,
+    activechatId,
+    updateActiveChatPicture,
+  } = useActiveChatStore();
   const {
     chats,
     updateChat,
@@ -67,30 +71,42 @@ function ChatDashboard() {
         sendMessage(payload);
       }
 
+      if (message.senderId !== userId && message.chatId !== activechatId) {
+        updateUnreadCount(message.chatId);
+      }
+
       const prevIdx = chats.findIndex((chat) => chat.chatId === message.chatId);
 
       if (prevIdx !== -1) {
-        const modifiedChat = chats[prevIdx];
-        const newList = [
-          modifiedChat,
-          ...chats.filter((_, index) => index !== prevIdx),
-        ];
-        updateChat(newList);
-
-        if (message.senderId !== userId && message.chatId !== activechatId) {
-          updateUnreadCount(message.chatId);
+        if (chats[prevIdx].chatId != chats[0].chatId) {
+          const moveTofirstChat = chats[prevIdx];
+          const newList = [
+            moveTofirstChat,
+            ...chats.filter((_, index) => index !== prevIdx),
+          ];
+          updateChat(newList);
         }
       }
     });
 
     registerMessageHandler(
       MessageType.CREATE_CHAT,
-      async (message: CreateChatPayload) => {
+      async (message: UserConversation) => {
         if (message.createdBy == userId) {
+          updateActiveChatPicture("");
           updateActiveChatId(message.chatId);
           updateActiveChatName(message.chatName);
+          updateMessages([]);
+          setMessageLoading(true);
           const messages = await changeChat(message.chatId);
+          setMessageLoading(false);
           updateMessages(messages);
+          const messageArr = [message];
+          const userIds = getUserIds(messageArr);
+          const userProfiles = await fetchUserProfile(userIds);
+          processUserProfileAndBio(messageArr, userId, userProfiles.users);
+          message = messageArr[0];
+          updateActiveChatPicture(message.profilePicture);
         }
         updateChat([...useChatStore.getState().chats, message]);
       }
@@ -132,15 +148,7 @@ function ChatDashboard() {
           maxSize={40}
           className="flex flex-col border-r"
         >
-          <div className="flex items-center px-4 pt-4">
-            <div className="flex justify-between items-center w-full">
-              <h2 className="text-lg font-semibold">Chats</h2>
-              <CreateChat />
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <ChatUsers setMessageLoading={setMessageLoading} />
-          </div>
+          <ChatUsers setMessageLoading={setMessageLoading} />
         </ResizablePanel>
 
         <ResizableHandle withHandle />

@@ -21,6 +21,7 @@ enum Role {
 model Chats {
   id          Int           @id @default(autoincrement())
   name        String?
+  profilePic  String?
   createdBy   Int
   createdAt   DateTime      @default(now())
   chatmembers ChatMembers[]

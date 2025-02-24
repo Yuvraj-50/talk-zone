@@ -13,11 +13,14 @@ import {
 function CreateChat() {
   const [step, setStep] = useState(1);
   const [memberList, setMemberList] = useState<ChatMembers[]>([]);
+  const [isPopOverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
   return (
     <div>
       <Popover
+        open={isPopOverOpen}
         onOpenChange={() => {
+          setIsPopOverOpen((prev) => !prev);
           setMemberList([]);
         }}
       >
@@ -30,7 +33,9 @@ function CreateChat() {
           />
         </PopoverTrigger>
         <PopoverContent className="min-h-80">
-          {step == 1 && <NewChat changeStep={setStep} />}
+          {step == 1 && (
+            <NewChat changeStep={setStep} setIsPopOverOpen={setIsPopOverOpen} />
+          )}
 
           {step == 2 && (
             <GroupChat
@@ -44,6 +49,7 @@ function CreateChat() {
             <GroupDetails
               memberList={memberList}
               setMemberList={setMemberList}
+              setIsPopOverOpen={setIsPopOverOpen}
             />
           )}
         </PopoverContent>

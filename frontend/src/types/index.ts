@@ -38,6 +38,8 @@ export enum CHATTYPE {
 
 export interface UserConversationChatMembers extends ChatMembers {
   isOnline: boolean;
+  profilePicture: string;
+  bio: string;
 }
 
 export interface UserConversation {
@@ -46,6 +48,8 @@ export interface UserConversation {
   chatType: CHATTYPE;
   chatMembers: UserConversationChatMembers[];
   unreadCount: number;
+  profilePicture: string;
+  createdBy: number;
 }
 
 export enum MessageType {
@@ -73,4 +77,10 @@ export interface TypingIndicator {
 export interface AddMemberToChat {
   chatId: number;
   members: UserConversationChatMembers[];
+}
+
+export interface UpdateProfileAndBio {
+  id: number;
+  profileUrl: string;
+  bio: string;
 }
