@@ -1,13 +1,6 @@
 import { Role } from "@prisma/client";
 import { createClient, RedisClientType } from "redis";
-
-interface ChatMembers {
-  userId: number;
-  userName: string;
-  role: Role;
-  joined_at: Date;
-  userEmail: string;
-}
+import { ChatMembers } from "../types";
 
 interface ClientPayloadChatMembers extends ChatMembers {
   isOnline: boolean;
@@ -52,23 +45,18 @@ class RedisStore {
     return await this.get(key);
   }
 
-  public static async getMemberStatus(
-    chatMembers: ChatMembers[]
-  ): Promise<ClientPayloadChatMembers[]> {
-    let res: ClientPayloadChatMembers[] = [];
-
-    for (const chatMember of chatMembers) {
-      const status = await RedisStore.hget(
-        `user_${chatMember.userId}`,
-        "status"
-      );
-      if (status == "online") {
-        res.push({ ...chatMember, isOnline: true });
-      } else {
-        res.push({ ...chatMember, isOnline: false });
-      }
-    }
-    return res;
+  public static async getMemberStatus<T>(
+    chatMembers: T[]
+  ): Promise<(T & { isOnline: boolean })[]> {
+    return await Promise.all(
+      chatMembers.map(async (chatMember) => {
+        const status = await RedisStore.hget(
+          `user_${(chatMember as any).userId}`,
+          "status"
+        );
+        return { ...chatMember, isOnline: status === "online" };
+      })
+    );
   }
 }
 
