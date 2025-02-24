@@ -1,10 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
 
-// CLOUDINARY_URL=cloudinary://959977618263883:LI3HUdYqtGQHCj24j5xW6qPmXRs@duyjktpqs
-// CLOUDINARY_CLOUD_NAME=duyjktpqs
-// CLOUDINARY_API_KEY=959977618263883
-// CLOUDINARY_API_SECRETE=LI3HUdYqtGQHCj24j5xW6qPmXRs
-
 export function configureCloudinary() {
   const ConfigOptions = cloudinary.config();
   console.log(ConfigOptions);
