@@ -7,12 +7,13 @@ import {
 } from "react";
 import { useAuthStore } from "../../../zustand/authStore";
 import useWebSocketStore from "../../../zustand/socketStore";
-import { ChatMembers, CHATTYPE, MessageType } from "../../../types";
+import { ChatMembers, CHATTYPE } from "../../../types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
+import useCreateChat from "@/hooks/use-createchat";
 
 interface GroupDetailsProps {
   memberList: ChatMembers[];
@@ -39,7 +40,8 @@ function GroupDetails({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuthStore();
-  const { sendMessage, socket } = useWebSocketStore();
+  const { socket } = useWebSocketStore();
+  const { createChat } = useCreateChat();
 
   const validateFile = (file: File): string | null => {
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
@@ -113,18 +115,12 @@ function GroupDetails({
         },
       ];
 
-      const payload = {
-        type: MessageType.CREATE_CHAT,
-        data: {
-          members: updatedMemberList,
-          chatType: CHATTYPE.GROUPCHAT,
-          groupName: groupName,
-          createrId: user.id,
-          profilePicture: profilePicture,
-        },
-      };
-
-      sendMessage(payload);
+      createChat(
+        updatedMemberList,
+        CHATTYPE.GROUPCHAT,
+        profilePicture,
+        groupName
+      );
 
       setMemberList([]);
       setGroupName("");

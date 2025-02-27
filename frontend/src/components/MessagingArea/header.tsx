@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { addCurrentUser, cn } from "@/lib/utils";
 import Adduseritem from "../Adduseritem";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { ScrollArea } from "../ui/scroll-area";
@@ -7,13 +7,20 @@ import { useRef, useState } from "react";
 import { MessageCircleWarning } from "lucide-react";
 import { User } from "lucide-react";
 import { useChatStore } from "@/zustand/ChatsStore";
-import { ChatMembers, CHATTYPE, MessageType } from "@/types";
+import {
+  ChatMembers,
+  CHATTYPE,
+  MessageType,
+  UserConversationChatMembers,
+} from "@/types";
 import GroupChat from "../sidebar/CreateNewChat/GroupChat";
 import { Button } from "../ui/button";
 import { Sheet } from "../ui/sheet";
 import useWebSocketStore from "@/zustand/socketStore";
 import { useToast } from "@/hooks/use-toast";
 import useActiveChatStore from "@/zustand/activeChatStore";
+import useCreateChat from "@/hooks/use-createchat";
+import { useAuthStore } from "@/zustand/authStore";
 
 interface MessageAreaHeaderProps {
   className?: string;
@@ -37,8 +44,9 @@ function MessageAreaHeader({ className, onClick }: MessageAreaHeaderProps) {
   const activeChatMembers = chats.find((chat) => chat.chatId === activechatId);
   const alreadyMembers = useRef(activeChatMembers?.chatMembers).current;
   const { socket, sendMessage } = useWebSocketStore();
-
   const { toast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const { createChat } = useCreateChat();
 
   function handleAddMemberToGroup() {
     const payload = {
@@ -60,6 +68,17 @@ function MessageAreaHeader({ className, onClick }: MessageAreaHeaderProps) {
   function handleListItem(title: string) {
     setItemSelected(title);
     setMemberList([]);
+  }
+
+  function handleChatMemberClick(member: ChatMembers) {
+    if (user) {
+      if (member.userId == user.id) return;
+
+      const otherMembers = [member];
+      addCurrentUser(otherMembers, user);
+      createChat(otherMembers, CHATTYPE.ONETOONE);
+      setIsPopOver(false);
+    }
   }
 
   return (
@@ -130,10 +149,12 @@ function MessageAreaHeader({ className, onClick }: MessageAreaHeaderProps) {
                     )}
                     {activeChatMembers.chatMembers.map((member) => (
                       <Adduseritem
+                        onClick={() => handleChatMemberClick(member)}
                         key={member.userId}
                         userName={member.userName}
                         userEmail={member.userEmail}
                         userImage={member.profilePicture}
+                        className="cursor-pointer"
                       />
                     ))}
                   </>

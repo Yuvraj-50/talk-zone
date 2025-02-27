@@ -1,4 +1,10 @@
-import { CHATTYPE, UpdateProfileAndBio, UserConversation } from "@/types";
+import {
+  ChatMembers,
+  CHATTYPE,
+  UpdateProfileAndBio,
+  User,
+  UserConversation,
+} from "@/types";
 import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -83,4 +89,12 @@ export function getUserIds(chats: UserConversation[]): number[] {
   );
 
   return Array.from(userId);
+}
+
+export function addCurrentUser(chatMembers: ChatMembers[], user: User): void {
+  chatMembers.push({
+    userId: user.id,
+    userName: user.name,
+    userEmail: user.email,
+  });
 }
