@@ -1,4 +1,5 @@
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+import { unlink } from "node:fs/promises";
 
 export function hello() {
   console.log(cloudinary.config().cloud_name);
@@ -11,15 +12,15 @@ export async function uploadToCloudinary(
   try {
     const result = await cloudinary.uploader.upload(photo, {
       folder,
-      public_id: "photo",
     });
+    
+    try {
+      await unlink(photo);
+    } catch (unlinkError) {
+      console.error(`Failed to delete local file ${photo}:`, unlinkError);
+    }
 
-    const optimizedUrl = cloudinary.url(result.public_id, {
-      fetch_format: "auto",
-      quality: "auto",
-    });
-
-    return optimizedUrl;
+    return result.secure_url;
   } catch (error) {
     throw error;
   }

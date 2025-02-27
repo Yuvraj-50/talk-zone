@@ -32,15 +32,9 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const profilePhoto = req.file?.filename;
-
+    const profilePhoto = req.file?.path;
     if (!profilePhoto) return;
-
-    const actualpath = path.resolve(__dirname, "../../uploads", profilePhoto);
-
-    const profilePhotoUrl = await uploadToCloudinary(actualpath);
-
+    const profilePhotoUrl = await uploadToCloudinary(profilePhoto);
     if (!profilePhotoUrl) return;
 
     const newUser = await prismaClient.user.create({
