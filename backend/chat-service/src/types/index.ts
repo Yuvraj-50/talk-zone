@@ -55,13 +55,16 @@ export const createChatDataSchema = z
     createrId: z.number(),
     profilePicture: z.string().optional().nullable(),
   })
-  .refine((data) => {
-    if (data.chatType === CHATTYPE.ONETOONE) {
-      return data.groupName === null;
-    } else {
-      return typeof data.groupName === "string";
-    }
-  });
+  .refine(
+    (data) => {
+      if (data.chatType === CHATTYPE.ONETOONE) {
+        return data.groupName === null;
+      } else {
+        return data.groupName !== null;
+      }
+    },
+    { message: "groupName is compulsory for group chat" }
+  );
 
 const typingIndicatorSchema = z.object({
   userName: z.string(),
