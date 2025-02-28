@@ -30,6 +30,7 @@ function useRegisterHandlers() {
     removeTypingUser,
     updateUnreadCount,
     addMemberToChat,
+    updateLatestMessage,
   } = useChatStore();
 
   const {
@@ -59,6 +60,15 @@ function useRegisterHandlers() {
       if (message.senderId !== userId && message.chatId !== activechatId) {
         updateUnreadCount(message.chatId);
       }
+
+      updateLatestMessage(
+        {
+          message: message.message,
+          senderId: message.senderId,
+          sent_at: message.sent_at,
+        },
+        message.chatId
+      );
 
       const prevIdx = chats.findIndex((chat) => chat.chatId === message.chatId);
 

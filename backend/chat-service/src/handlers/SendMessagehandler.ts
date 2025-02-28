@@ -9,7 +9,6 @@ interface SendMessageType extends BaseMessageType {
   };
 }
 
-
 export class SendMessageHandler extends BaseMessageHandler {
   async handle(payload: SendMessageType, userId: number): Promise<void> {
     const message = payload.data.message;
@@ -25,7 +24,7 @@ export class SendMessageHandler extends BaseMessageHandler {
     };
 
     this.broadCastToGroup(JSON.stringify(messagePayload), groupMembers);
-
+    this.updateLatestTimeStamp(groupId);
     await this.increaseMessageCnt(groupId, userId, groupMembers);
   }
 
@@ -88,6 +87,21 @@ export class SendMessageHandler extends BaseMessageHandler {
       userName: sender?.userName,
       role: sender?.role,
     };
+  }
+
+  async updateLatestTimeStamp(chatId: number) {
+    try {
+      await prisma.chats.update({
+        data: {
+          latestTimeStamp: new Date(),
+        },
+        where: {
+          id: chatId,
+        },
+      });
+    } catch (error) {
+      console.log("error updating the timestamp");
+    }
   }
 
   broadCastToGroup(message: string, groupMembers: GroupMembers[]) {

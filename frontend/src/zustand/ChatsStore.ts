@@ -1,5 +1,9 @@
 import { create } from "zustand";
-import { UserConversation, UserConversationChatMembers } from "../types";
+import {
+  LatestMessage,
+  UserConversation,
+  UserConversationChatMembers,
+} from "../types";
 import { immer } from "zustand/middleware/immer";
 
 interface Chats {
@@ -18,12 +22,11 @@ interface ChatsAction {
     chatId: number,
     chatMembers: UserConversationChatMembers[]
   ) => void;
-  // fetchUserProfile: (chatIds: number[]) => void;
-  // updateProfileAndBio: (users: UpdateProfileAndBio[]) => void;
+  updateLatestMessage: (newMessage: LatestMessage, chatId: number) => void;
 }
 
 export const useChatStore = create<Chats & ChatsAction>()(
-  immer((set, get) => ({
+  immer((set) => ({
     chats: [],
     typingUsers: {},
 
@@ -90,35 +93,12 @@ export const useChatStore = create<Chats & ChatsAction>()(
         }
       }),
 
-    // fetchUserProfile: (chatIds: number[]) =>
-    //   set(async () => {
-    //     const response = await axios.post<{ users: UpdateProfileAndBio[] }>(
-    //       "http://localhost:9000/api/v1/auth/userProfiles",
-    //       { users: chatIds },
-    //       { withCredentials: true }
-    //     );
-
-    //     get().updateProfileAndBio(response.data.users);
-    //   }),
-
-    // updateProfileAndBio: (users: UpdateProfileAndBio[]) =>
-    //   set((state) => {
-    //     state.chats.forEach((chat) => {
-    //       if (chat.profilePicture == null) {
-    //         const user = useAuthStore.getState().user;
-    //         if (user && user.id) {
-    //           const profilePicture = evalActiveChatProfile(chat, user.id);
-    //           chat.profilePicture = profilePicture;
-    //         }
-    //       }
-    //       chat.chatMembers.forEach((member) => {
-    //         const userUpdate = users.find((user) => user.id === member.userId);
-    //         if (userUpdate) {
-    //           member.profilePicture = userUpdate.profileUrl;
-    //           member.bio = userUpdate.bio;
-    //         }
-    //       });
-    //     });
-    //   }),
+    updateLatestMessage: (newMessage: LatestMessage, chatId: number) =>
+      set((state) => {
+        const chat = state.chats.find((chat) => chat.chatId == chatId);
+        if (chat) {
+          chat.latestMessage = newMessage;
+        }
+      }),
   }))
 );

@@ -18,7 +18,7 @@ export interface ChatMessage {
   id: number;
   message: string;
   senderId: number;
-  sent_at: string;
+  sent_at: Date;
   chatId: number;
   role: Role;
   userId: number;
@@ -42,6 +42,11 @@ export interface UserConversationChatMembers extends ChatMembers {
   bio: string;
 }
 
+export interface LatestMessage {
+  senderId: number;
+  message: string;
+  sent_at: Date;
+}
 export interface UserConversation {
   chatId: number;
   chatName: string;
@@ -50,6 +55,7 @@ export interface UserConversation {
   unreadCount: number;
   profilePicture: string;
   createdBy: number;
+  latestMessage: LatestMessage;
 }
 
 export enum MessageType {

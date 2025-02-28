@@ -98,3 +98,45 @@ export function addCurrentUser(chatMembers: ChatMembers[], user: User): void {
     userEmail: user.email,
   });
 }
+
+export const calculateDate = (time: string | number | Date): string => {
+  const messageTime = new Date(time);
+  const now = new Date();
+
+  const messageDateOnly = new Date(messageTime);
+  messageDateOnly.setHours(0, 0, 0, 0);
+
+  const nowDateOnly = new Date(now);
+  nowDateOnly.setHours(0, 0, 0, 0);
+
+  const isToday = messageDateOnly.getTime() === nowDateOnly.getTime();
+
+  const yesterday = new Date(nowDateOnly);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = messageDateOnly.getTime() === yesterday.getTime();
+
+  if (isToday) {
+    return messageTime.toLocaleTimeString("en-US", {
+      minute: "2-digit",
+      hour: "2-digit",
+    });
+  } else if (isYesterday) {
+    return "Yesterday";
+  } else {
+    const currentYear = new Date().getFullYear();
+    const messageYear = messageTime.getFullYear();
+
+    if (messageYear === currentYear) {
+      return messageTime.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    } else {
+      return messageTime.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+  }
+};

@@ -127,10 +127,10 @@ function MessageAreaHeader({ className, onClick }: MessageAreaHeaderProps) {
                 {itemSelected === "Overview" && (
                   <div className="flex justify-center flex-col items-center w-full">
                     <Avatar className="h-20 w-20">
+                      <AvatarImage src={activeChatPicture}></AvatarImage>
                       <AvatarFallback>
                         {activeChatName[0].toUpperCase()}
                       </AvatarFallback>
-                      <AvatarImage></AvatarImage>
                     </Avatar>
                     <p>{activeChatName}</p>
                     <p> hey i am using chat app </p>

@@ -29,6 +29,11 @@ type createChatData = {
     isOnline: boolean;
   }[];
   profilePicture: string | null;
+  latestMessage: {
+    senderId: number;
+    message: string;
+    sent_at: Date;
+  };
 };
 
 // export async function CreateChat(req: Request, res: Response) {
@@ -185,6 +190,9 @@ export async function GetChat(req: Request, res: Response) {
           },
         },
       },
+      orderBy: {
+        latestTimeStamp: "desc",
+      },
     });
 
     console.log(chats);
@@ -211,6 +219,7 @@ export async function GetChat(req: Request, res: Response) {
         chatMembers: chatmemeberswithstatus,
         unreadCount:
           chat.unreadCount.length > 0 ? chat.unreadCount[0].count : 0,
+        latestMessage: chat.messages[0] ?? {},
       });
     }
 

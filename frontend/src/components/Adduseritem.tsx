@@ -25,7 +25,7 @@ function Adduseritem({
       className={cn("flex items-center mt-3 rounded-r-lg gap-3 p-2", className)}
       onClick={onClick}
     >
-      <Avatar className="h-8 w-8 border border-primary flex justify-center items-center">
+      <Avatar className="h-8 w-8 flex justify-center items-center">
         <AvatarImage className="w-10 h-10 rounded-full" src={userImage} />
         <AvatarFallback>
           {avatarFallBack

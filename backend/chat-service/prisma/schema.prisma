@@ -19,14 +19,15 @@ enum Role {
 }
 
 model Chats {
-  id          Int           @id @default(autoincrement())
-  name        String?
-  profilePic  String?
-  createdBy   Int
-  createdAt   DateTime      @default(now())
-  chatmembers ChatMembers[]
-  messages    Messages[]
-  unreadCount UnreadCount[]
+  id              Int           @id @default(autoincrement())
+  name            String?
+  profilePic      String?
+  createdBy       Int
+  latestTimeStamp DateTime?
+  createdAt       DateTime      @default(now())
+  chatmembers     ChatMembers[]
+  messages        Messages[]
+  unreadCount     UnreadCount[]
 }
 
 model ChatMembers {

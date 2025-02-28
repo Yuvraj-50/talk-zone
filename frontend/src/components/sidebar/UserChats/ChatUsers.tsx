@@ -5,11 +5,11 @@ import useActiveChatStore from "../../../zustand/activeChatStore";
 import ChatMessage from "./ChatMessage";
 import changeChat from "../../../lib";
 import { CHATTYPE, MessageType, UserConversation } from "../../../types";
-import axios from "axios";
 import useWebSocketStore from "../../../zustand/socketStore";
 import { ScrollArea } from "../../ui/scroll-area";
 import {
   fetchUserProfile,
+  getAllChats,
   getUserIds,
   processUserProfileAndBio,
 } from "@/lib/utils";
@@ -59,14 +59,10 @@ function ChatUsers({
   }
 
   useEffect(() => {
-    async function getAllChats() {
+    async function getUserAllChats() {
       try {
-        const { data: userChatData } = await axios.get<UserConversation[]>(
-          "http://localhost:3000/api/v1/chat",
-          {
-            withCredentials: true,
-          }
-        );
+        const userChatData = await getAllChats();
+        if (!userChatData) return;
         const userId: number[] = getUserIds(userChatData);
         const userProfileBio = await fetchUserProfile(userId);
         if (loggedInUser) {
@@ -81,18 +77,17 @@ function ChatUsers({
         console.error("Failed to fetch chats", error);
       }
     }
-
-    getAllChats();
+    getUserAllChats();
   }, []);
 
   return (
     <>
-      <div className="flex justify-between items-center w-full px-4 pt-4 pb-2">
+      <div className="flex justify-between items-center px-4 pt-4 pb-2">
         <h2 className="text-lg font-semibold">Chats</h2>
         <CreateChat />
       </div>
-      <ScrollArea className="flex-1">
-        <div className="space-y-2 p-2">
+      <ScrollArea className="scroll-area-override">
+        <div className="space-y-2 p-2 w-full">
           {chats.map((chat) => {
             const isOnline = chat.chatMembers.every(
               (member) => member.isOnline
@@ -107,8 +102,9 @@ function ChatUsers({
                 isOnline={isOnline}
                 unreadCount={chat.unreadCount}
                 isActive={isActive}
-                onClick={() => handleChangeChat(chat)}
                 profilePic={chat.profilePicture}
+                latestMessage={chat.latestMessage}
+                onClick={() => handleChangeChat(chat)}
               />
             );
           })}
