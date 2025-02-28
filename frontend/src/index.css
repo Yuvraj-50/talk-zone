@@ -108,3 +108,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+.scroll-area-override [style*="display: table"] {
+  display: block !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
