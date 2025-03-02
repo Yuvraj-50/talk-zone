@@ -19,6 +19,7 @@ import GoogleSignUp from "./GoogleSignUp";
 import { HoverCard, HoverCardTrigger } from "./ui/hover-card";
 import { HoverCardContent } from "@radix-ui/react-hover-card";
 import { AuthResponse } from "@/types";
+import Loader from "./ui/loader";
 
 interface FormStateType {
   email: string;
@@ -27,23 +28,26 @@ interface FormStateType {
   bio: string;
 }
 
+const initialState = {
+  email: "",
+  password: "",
+  name: "",
+  bio: "Typing... probably something unnecessary. 🤪",
+};
+
 function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [formState, setFormState] = useState<FormStateType>({
-    email: "",
-    password: "",
-    name: "",
-    bio: "Typing... probably something unnecessary. 🤪",
-  });
+  const [formState, setFormState] = useState<FormStateType>(initialState);
 
   const [image, setImage] = useState<File | null>(null);
-
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
-  const { updateAuth, authenticated } = useAuthStore();
+
+  const { setUser, setAuthenticated, authenticated, loading, setLoading } =
+    useAuthStore();
 
   function handleStateUpdate(
     e:
@@ -77,6 +81,7 @@ function SignUpForm({
 
     try {
       setLoading(true);
+      setError(null);
 
       const formData = new FormData();
       formData.append("email", formState.email);
@@ -93,23 +98,20 @@ function SignUpForm({
         { withCredentials: true }
       );
 
-      setFormState({ email: "", password: "", name: "", bio: "" });
+      setFormState(initialState);
 
       const { user } = response.data;
 
-      console.log(user);
-
       if (user) {
-        updateAuth({
-          user,
-          authenticated: true,
-        });
+        setUser(user);
+        setAuthenticated(true);
       }
 
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      console.log("Error in signup:", error);
+      setError(error.response.data.message);
+      setFormState(initialState);
     }
   }
 
@@ -117,11 +119,16 @@ function SignUpForm({
     if (authenticated) {
       navigate("/");
     }
-  }, [authenticated]);
+  }, [authenticated, navigate]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
+        {error && (
+          <div className="p-3 text-sm bg-red-100 border border-red-300 text-red-600 rounded-md">
+            {error}
+          </div>
+        )}
         <CardHeader>
           <CardTitle className="text-2xl">Create new Account</CardTitle>
           <CardDescription>
@@ -205,7 +212,7 @@ function SignUpForm({
               </div>
               {loading ? (
                 <Button disabled={true} className="w-full">
-                  Loading...
+                  <Loader variant="secondary" size="sm" />
                 </Button>
               ) : (
                 <Button type="submit" className="w-full">

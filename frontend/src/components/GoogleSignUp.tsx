@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 function GoogleSignUp() {
-  const [loading, setLoading] = useState(false);
-  const { authenticated, updateAuth } = useAuthStore();
+  const { authenticated, setLoading, setUser, setAuthenticated } =
+    useAuthStore();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   async function handleGoogleSignUp(credentialResponse: CredentialResponse) {
     try {
@@ -26,14 +27,13 @@ function GoogleSignUp() {
       const { user } = response.data;
 
       if (user) {
-        updateAuth({
-          user: user,
-          authenticated: true,
-        });
+        setUser(user);
+        setAuthenticated(true);
       }
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      setError("Google login failed");
       console.log("error", "google login", error);
     }
   }
@@ -47,12 +47,17 @@ function GoogleSignUp() {
   return (
     <>
       <GoogleLogin
+        shape="circle"
+        theme="filled_black"
+        type="standard"
+        text="continue_with"
         onSuccess={handleGoogleSignUp}
         onError={() => {
-          console.log("Login Failed");
+          setError("Google login failed");
+          setLoading(false);
         }}
       />
-      {loading && <div className="flex justify-center"> loading ... </div>}
+      {error && <p>{error + "try again later"}</p>}
     </>
   );
 }

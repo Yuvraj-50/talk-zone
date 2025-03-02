@@ -15,12 +15,14 @@ import {
 import useActiveChatStore from "@/zustand/activeChatStore";
 import { useAuthStore } from "@/zustand/authStore";
 import { useChatStore } from "@/zustand/ChatsStore";
+import useLoadersStore from "@/zustand/loaderStore";
 import { useMessagesStore } from "@/zustand/messageStore";
 import useWebSocketStore from "@/zustand/socketStore";
 import { useEffect, useState } from "react";
 
 function useRegisterHandlers() {
   const [messageLoading, setMessageLoading] = useState<boolean>(false);
+  const setLoading = useLoadersStore((state) => state.setLoading);
 
   const {
     chats,
@@ -61,15 +63,6 @@ function useRegisterHandlers() {
         updateUnreadCount(message.chatId);
       }
 
-      updateLatestMessage(
-        {
-          message: message.message,
-          senderId: message.senderId,
-          sent_at: message.sent_at,
-        },
-        message.chatId
-      );
-
       const prevIdx = chats.findIndex((chat) => chat.chatId === message.chatId);
 
       if (prevIdx !== -1) {
@@ -82,11 +75,21 @@ function useRegisterHandlers() {
           updateChat(newList);
         }
       }
+      
+      updateLatestMessage(
+        {
+          message: message.message,
+          senderId: message.senderId,
+          sent_at: message.sent_at,
+        },
+        message.chatId
+      );
     });
 
     registerMessageHandler(
       MessageType.CREATE_CHAT,
       async (message: UserConversation) => {
+        setLoading("CREATE_CHAT", false);
         if (message.createdBy == userId) {
           updateActiveChatPicture("");
           updateActiveChatId(message.chatId);

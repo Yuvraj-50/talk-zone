@@ -7,31 +7,36 @@ import { AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ModeToggle } from "./toggle-mode";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
+import Loader from "./ui/loader";
 
 function Navbar() {
-  const { user, updateAuth, authenticated } = useAuthStore();
+  const { user, authenticated, logout, loading, setLoading } = useAuthStore();
   const { disconnect } = useWebSocketStore();
   const navigate = useNavigate();
 
   async function handleLogout() {
-    const response = await axios.get(
-      "http://localhost:9000/api/v1/auth/logout",
-      {
-        withCredentials: true,
-      }
-    );
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        "http://localhost:9000/api/v1/auth/logout",
+        {
+          withCredentials: true,
+        }
+      );
 
-    if (response.status === 200) {
-      updateAuth({
-        authenticated: false,
-        user: null,
-      });
-      disconnect();
+      if (response.status === 200) {
+        logout();
+        disconnect();
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    navigate("/login");
+    navigate("/login", { replace: true });
   }, [authenticated]);
 
   return (
@@ -49,9 +54,15 @@ function Navbar() {
         <AvatarFallback>Ys</AvatarFallback>
       </Avatar>
       <ModeToggle />
-      <Button variant="default" onClick={handleLogout}>
-        Logout
-      </Button>
+      {loading ? (
+        <Button size={"default"}>
+          <Loader variant="secondary" size="sm" />
+        </Button>
+      ) : (
+        <Button variant="default" size={"default"} onClick={handleLogout}>
+          Logout
+        </Button>
+      )}
     </div>
   );
 }

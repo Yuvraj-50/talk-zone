@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import Adduseritem from "@/components/Adduseritem";
 import useCreateChat from "@/hooks/use-createchat";
 import { addCurrentUser } from "@/lib/utils";
+import useLoadersStore from "@/zustand/loaderStore";
 
 interface UserDate {
   users: User[];
@@ -25,6 +26,7 @@ function NewChat({ changeStep, setIsPopOverOpen }: NewChatProps) {
   const [search, setSearch] = useState<string>("");
   const user = useAuthStore((state) => state.user);
   const { createChat, findExistingChat } = useCreateChat();
+  const setLoading = useLoadersStore((state) => state.setLoading);
 
   async function handlecreateNewChat(member: ChatMembers) {
     let otherMembers: ChatMembers[] = [member];
@@ -37,7 +39,7 @@ function NewChat({ changeStep, setIsPopOverOpen }: NewChatProps) {
       console.log("low members");
       return;
     }
-
+    setLoading("CREATE_CHAT", true);
     createChat(otherMembers, CHATTYPE.ONETOONE);
     setIsPopOverOpen(false);
   }

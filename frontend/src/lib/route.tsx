@@ -4,6 +4,7 @@ import { Routes } from "react-router";
 import ChatDashboard from "../components/ChatDashboard";
 import LoginPage from "@/pages/Login";
 import SignUpPage from "@/pages/Signup";
+import Loader from "@/components/ui/loader";
 
 export const ProtectedRoute = ({
   authenticated,
@@ -21,7 +22,7 @@ export const MyRouter = () => {
   const { authenticated, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading....</div>;
+    return <Loader fullScreen variant="primary" size="lg" />;
   }
 
   return (

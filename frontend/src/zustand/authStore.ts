@@ -4,15 +4,44 @@ import { create } from "zustand";
 type AuthState = {
   user: User | null;
   authenticated: boolean;
+  loading: boolean;
 };
 
 type AuthAction = {
-  updateAuth: (auth: AuthState) => void;
+  updateAuth: (auth: Partial<AuthState>) => void;
+  setLoading: (val: boolean) => void;
+  setUser: (user: User | null) => void;
+  setAuthenticated: (val: boolean) => void;
+  resetState: () => void;
+  logout: () => void;
+};
+
+const initialState: AuthState = {
+  user: null,
+  loading: false,
+  authenticated: false,
 };
 
 export const useAuthStore = create<AuthState & AuthAction>()((set) => ({
-  user: null,
-  authenticated: false,
-  updateAuth: (auth) =>
-    set({ user: auth.user, authenticated: auth.authenticated }),
+  ...initialState,
+  
+  updateAuth: (auth: Partial<AuthState>) => 
+    set((state) => ({ ...state, ...auth })),
+  
+  setLoading: (val: boolean) => 
+    set((state) => ({ ...state, loading: val })),
+  
+  setUser: (user: User | null) => 
+    set((state) => ({ ...state, user })),
+  
+  setAuthenticated: (val: boolean) => 
+    set((state) => ({ ...state, authenticated: val })),
+  
+  
+  resetState: () => set(initialState),
+  
+  logout: () => set({ 
+    user: null, 
+    authenticated: false, 
+  }),
 }));

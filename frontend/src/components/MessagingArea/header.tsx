@@ -7,12 +7,7 @@ import { useRef, useState } from "react";
 import { MessageCircleWarning } from "lucide-react";
 import { User } from "lucide-react";
 import { useChatStore } from "@/zustand/ChatsStore";
-import {
-  ChatMembers,
-  CHATTYPE,
-  MessageType,
-  UserConversationChatMembers,
-} from "@/types";
+import { ChatMembers, CHATTYPE, MessageType } from "@/types";
 import GroupChat from "../sidebar/CreateNewChat/GroupChat";
 import { Button } from "../ui/button";
 import { Sheet } from "../ui/sheet";

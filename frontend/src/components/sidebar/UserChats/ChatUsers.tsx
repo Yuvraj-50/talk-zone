@@ -1,26 +1,20 @@
-import { useMessagesStore } from "../../../zustand/messageStore";
-import { useChatStore } from "../../../zustand/ChatsStore";
-import { memo, useEffect } from "react";
-import useActiveChatStore from "../../../zustand/activeChatStore";
-import ChatMessage from "./ChatMessage";
-import changeChat from "../../../lib";
-import { CHATTYPE, MessageType, UserConversation } from "../../../types";
-import useWebSocketStore from "../../../zustand/socketStore";
-import { ScrollArea } from "../../ui/scroll-area";
-import {
-  fetchUserProfile,
-  getAllChats,
-  getUserIds,
-  processUserProfileAndBio,
-} from "@/lib/utils";
-import { useAuthStore } from "@/zustand/authStore";
+import changeChat from "@/lib";
+import { MessageType, UserConversation } from "@/types";
+import useActiveChatStore from "@/zustand/activeChatStore";
+import { useChatStore } from "@/zustand/ChatsStore";
+import { useMessagesStore } from "@/zustand/messageStore";
+import useWebSocketStore from "@/zustand/socketStore";
 import CreateChat from "../CreateNewChat/CreateChat";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { memo } from "react";
+import Conversation from "./ChatMessage";
+
 function ChatUsers({
   setMessageLoading,
 }: {
   setMessageLoading: (loading: boolean) => void;
 }) {
-  const { chats, updateChat, resetUnreadCount } = useChatStore();
+  const { chats, resetUnreadCount } = useChatStore();
   const { updateMessages } = useMessagesStore();
   const {
     updateActiveChatId,
@@ -30,7 +24,6 @@ function ChatUsers({
   } = useActiveChatStore();
   const socket = useWebSocketStore((state) => state.socket);
   const sendMessage = useWebSocketStore((state) => state.sendMessage);
-  const loggedInUser = useAuthStore((state) => state.user?.id);
 
   async function handleChangeChat(chat: UserConversation) {
     const { chatId: id, chatName } = chat;
@@ -58,27 +51,7 @@ function ChatUsers({
     }
   }
 
-  useEffect(() => {
-    async function getUserAllChats() {
-      try {
-        const userChatData = await getAllChats();
-        if (!userChatData) return;
-        const userId: number[] = getUserIds(userChatData);
-        const userProfileBio = await fetchUserProfile(userId);
-        if (loggedInUser) {
-          processUserProfileAndBio(
-            userChatData,
-            loggedInUser,
-            userProfileBio.users
-          );
-          updateChat(userChatData);
-        }
-      } catch (error) {
-        console.error("Failed to fetch chats", error);
-      }
-    }
-    getUserAllChats();
-  }, []);
+  console.log("Component Rendered");
 
   return (
     <>
@@ -94,7 +67,7 @@ function ChatUsers({
             );
             const isActive = activechatId === chat.chatId;
             return (
-              <ChatMessage
+              <Conversation
                 key={chat.chatId}
                 chatId={chat.chatId}
                 chatName={chat.chatName}

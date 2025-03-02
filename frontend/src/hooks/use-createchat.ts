@@ -3,6 +3,7 @@ import { ChatMembers, CHATTYPE, MessageType, UserConversation } from "@/types";
 import useActiveChatStore from "@/zustand/activeChatStore";
 import { useAuthStore } from "@/zustand/authStore";
 import { useChatStore } from "@/zustand/ChatsStore";
+import useLoadersStore from "@/zustand/loaderStore";
 import { useMessagesStore } from "@/zustand/messageStore";
 import useWebSocketStore from "@/zustand/socketStore";
 
@@ -10,10 +11,15 @@ const useCreateChat = () => {
   const user = useAuthStore((state) => state.user);
   const chats = useChatStore((state) => state.chats);
   const updateMessages = useMessagesStore((state) => state.updateMessages);
-  const { activechatId, updateActiveChatId, updateActiveChatName, updateActiveChatPicture } =
-    useActiveChatStore();
+  const {
+    activechatId,
+    updateActiveChatId,
+    updateActiveChatName,
+    updateActiveChatPicture,
+  } = useActiveChatStore();
   const resetUnreadCount = useChatStore((state) => state.resetUnreadCount);
   const { socket, sendMessage } = useWebSocketStore();
+  const setLoading = useLoadersStore((state) => state.setLoading);
 
   function findExistingChat(chatMembers: ChatMembers[]) {
     const sortedMemberList = [...chatMembers].sort((a, b) =>
@@ -37,7 +43,7 @@ const useCreateChat = () => {
   }
 
   async function handleExistingChat(chat: UserConversation) {
-    if(activechatId == chat.chatId) return;
+    if (activechatId == chat.chatId) return;
     updateMessages([]);
     updateActiveChatId(chat.chatId);
     updateActiveChatName(chat.chatName);
@@ -82,17 +88,6 @@ const useCreateChat = () => {
       sendMessage(payload);
     }
   }
-  //   const payload = {
-  //   type: MessageType.CREATE_CHAT,
-  //   data: {
-  //     members: updatedMemberList,
-  //     chatType: CHATTYPE.GROUPCHAT,
-  //     groupName: groupName,
-  //     createrId: user.id,
-  //     profilePicture: profilePicture,
-  //   },
-  // };
-  // sendMessage(payload);
 
   function createChat(
     member: ChatMembers[],
@@ -104,6 +99,7 @@ const useCreateChat = () => {
       const existingChat = findExistingChat(member);
       if (existingChat) {
         handleExistingChat(existingChat);
+        setLoading("CREATE_CHAT", false);
         return;
       } else {
         createNewChat(member, chatType);

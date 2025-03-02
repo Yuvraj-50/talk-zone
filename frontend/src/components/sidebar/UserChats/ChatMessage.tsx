@@ -1,6 +1,5 @@
 import { CHATTYPE, LatestMessage } from "../../../types";
 import { calculateDate, cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -22,7 +21,6 @@ const Conversation = ({
   profilePic,
   latestMessage,
   pendingMessages = 0,
-  chatId,
   isOnline,
   chatType,
   unreadCount,
@@ -33,7 +31,7 @@ const Conversation = ({
     <>
       <div
         className={cn(
-          "px-4 py-6 h-auto w-full hover:bg-secondary/80 cursor-default",
+          "px-4 py-6 h-auto w-full hover:bg-secondary/80 cursor-default rounded-xl",
           isActive && "bg-secondary"
         )}
         onClick={onClick}
@@ -50,15 +48,15 @@ const Conversation = ({
             </Avatar>
 
             {chatType === CHATTYPE.ONETOONE && (
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background">
+              <span className="absolute bottom-0  right-0 w-3 h-3 rounded-full border-2 border-background">
                 <span
                   className={cn(
-                    "absolute inline-flex h-full  rounded-full",
+                    "absolute inline-flex h-full w-full rounded-full",
                     isOnline ? "bg-primary" : "bg-gray-500"
                   )}
                 >
                   {isOnline && (
-                    <span className="animate-ping absolute inline-flex h-full  rounded-full bg-primary opacity-75" />
+                    <span className="animate-ping w-full absolute inline-flex h-full  rounded-full bg-primary opacity-75" />
                   )}
                 </span>
               </span>

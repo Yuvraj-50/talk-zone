@@ -7,7 +7,8 @@ import { AuthResponse } from "@/types";
 export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { updateAuth, authenticated } = useAuthStore();
+  const {  authenticated, setUser, setAuthenticated } =
+    useAuthStore();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -21,26 +22,20 @@ export const useAuth = () => {
 
         const { user } = response.data;
 
-        console.log(user, "hooks");
-
         if (user) {
-          updateAuth({
-            user,
-            authenticated: true,
-          });
+          setUser(user);
+          setAuthenticated(true);
         }
       } catch (err) {
-        updateAuth({
-          user: null,
-          authenticated: false,
-        });
+        setUser(null);
+        setAuthenticated(false);
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, [updateAuth]);
+  }, [setUser, setAuthenticated]);
 
   useEffect(() => {
     if (

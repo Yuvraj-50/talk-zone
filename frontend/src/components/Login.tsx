@@ -21,6 +21,7 @@ import { Label } from "./ui/label";
 import { useAuthStore } from "@/zustand/authStore";
 import GoogleSignUp from "./GoogleSignUp";
 import { AuthResponse } from "@/types";
+import Loader from "./ui/loader";
 
 function LoginForm({
   className,
@@ -30,10 +31,12 @@ function LoginForm({
     email: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
-  const { updateAuth, authenticated } = useAuthStore();
+  const { setUser, setAuthenticated, authenticated, loading, setLoading } =
+    useAuthStore();
 
   function handleStateUpdate(e: React.ChangeEvent<HTMLInputElement>) {
     const key = e.target.type;
@@ -65,13 +68,12 @@ function LoginForm({
       const { user } = response.data;
 
       if (user) {
-        updateAuth({
-          user,
-          authenticated: true,
-        });
+        setUser(user);
+        setAuthenticated(true);
       }
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
+      setError(error.response.data.message);
       setLoading(false);
       console.log("Invalid userName or password");
     }
@@ -79,13 +81,18 @@ function LoginForm({
 
   useEffect(() => {
     if (authenticated) {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, [authenticated]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
+        {error && (
+          <div className="p-3 text-sm bg-red-100 border border-red-300 text-red-600 rounded-md">
+            {error}
+          </div>
+        )}
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
@@ -126,7 +133,7 @@ function LoginForm({
               </div>
               {loading ? (
                 <Button disabled={true} className="w-full">
-                  loading..
+                  <Loader variant="secondary" />
                 </Button>
               ) : (
                 <Button type="submit" className="w-full">

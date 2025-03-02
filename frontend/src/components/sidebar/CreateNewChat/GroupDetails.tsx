@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
 import useCreateChat from "@/hooks/use-createchat";
+import useLoadersStore from "@/zustand/loaderStore";
 
 interface GroupDetailsProps {
   memberList: ChatMembers[];
@@ -38,9 +38,10 @@ function GroupDetails({
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuthStore();
-  const { socket } = useWebSocketStore();
+
+  const user = useAuthStore((state) => state.user);
+  const socket = useWebSocketStore((state) => state.socket);
+  const setLoading = useLoadersStore((state) => state.setLoading);
   const { createChat } = useCreateChat();
 
   const validateFile = (file: File): string | null => {
@@ -98,14 +99,13 @@ function GroupDetails({
     if (!socket || !user) return;
 
     try {
-      setIsLoading(true);
       setError(null);
 
       if (memberList.length === 0) {
         setError("Please add at least one member to the group");
         return;
       }
-
+      setLoading("CREATE_CHAT", true);
       const updatedMemberList = [
         ...memberList,
         {
@@ -131,8 +131,6 @@ function GroupDetails({
     } catch (error) {
       setError("Failed to create group. Please try again.");
       console.error("Error creating group:", error);
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -196,16 +194,9 @@ function GroupDetails({
       <Button
         className="w-full"
         type="submit"
-        disabled={isLoading || memberList.length === 0}
+        disabled={memberList.length === 0}
       >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creating Group...
-          </>
-        ) : (
-          "Create Group"
-        )}
+        "Create Group"
       </Button>
     </form>
   );
