@@ -19,7 +19,7 @@ function App() {
   const cliendId = import.meta.env.VITE_CLIENTID;
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
+    <ThemeProvider defaultTheme="violet" storageKey="ui-theme">
       <BrowserRouter>
         <GoogleOAuthProvider clientId={cliendId}>
           <MyRouter />
