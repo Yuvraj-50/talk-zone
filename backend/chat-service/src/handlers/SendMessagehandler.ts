@@ -6,15 +6,24 @@ interface SendMessageType extends BaseMessageType {
   data: {
     message: string;
     groupId: number;
+    tempId: number;
   };
 }
 
 export class SendMessageHandler extends BaseMessageHandler {
   async handle(payload: SendMessageType, userId: number): Promise<void> {
-    const message = payload.data.message;
-    const groupId = payload.data.groupId;
+    const { message, groupId, tempId } = payload.data;
     const messageType = payload.type;
 
+    // as soon as come send the message back to the user indicating that it is sent
+    const messageOptimisticPayload = {
+      type: MessageType.MESSAGE_OPTIMISTIC,
+      data: {
+        id: tempId,
+      },
+    };
+
+    this.sendMessageToUser(JSON.stringify(messageOptimisticPayload), userId);
     const groupMembers: GroupMembers[] = await this.getGroupMembers(groupId);
     const storedMessage = await this.storeMessageInDb(message, groupId, userId);
 
@@ -23,7 +32,16 @@ export class SendMessageHandler extends BaseMessageHandler {
       data: storedMessage,
     };
 
-    this.broadCastToGroup(JSON.stringify(messagePayload), groupMembers);
+    const updateTempIdPayload = {
+      type: MessageType.UPDATE_TEMPID,
+      data: {
+        realId: storedMessage.id,
+        tempId,
+      },
+    };
+
+    this.broadCastToGroup(JSON.stringify(messagePayload), groupMembers, userId);
+    this.sendMessageToUser(JSON.stringify(updateTempIdPayload), userId);
     this.updateLatestTimeStamp(groupId);
     await this.increaseMessageCnt(groupId, userId, groupMembers);
   }
@@ -85,7 +103,6 @@ export class SendMessageHandler extends BaseMessageHandler {
       message: saveMessage,
       sent_at,
       userName: sender?.userName,
-      role: sender?.role,
     };
   }
 
@@ -104,9 +121,11 @@ export class SendMessageHandler extends BaseMessageHandler {
     }
   }
 
-  broadCastToGroup(message: string, groupMembers: GroupMembers[]) {
+  broadCastToGroup(message: string, groupMembers: GroupMembers[], userId: number) {
     groupMembers.forEach(async (member) => {
-      await this.sendMessageToUser(message, member.userId);
+      if (member.userId !== userId) {
+        await this.sendMessageToUser(message, member.userId);
+      }
     });
   }
 

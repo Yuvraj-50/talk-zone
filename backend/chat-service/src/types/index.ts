@@ -10,6 +10,8 @@ export enum MessageType {
   ERROR = "ERROR",
   UNREADMESSAGECOUNT = "UNREADMESSAGECOUNT",
   ADD_MEMBER = "ADD_MEMBER",
+  UPDATE_TEMPID = "UPDATE_TEMPID",
+  MESSAGE_OPTIMISTIC = "MESSAGE_OPTIMISTIC",
 }
 
 export interface JWTPAYLOAD {
@@ -37,6 +39,7 @@ export type GroupMembers = {
 const sendMessageDataSchema = z.object({
   message: z.string(),
   groupId: z.number(),
+  tempId: z.number(),
 });
 
 const memberSchema = z.array(
