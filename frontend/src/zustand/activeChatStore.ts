@@ -12,14 +12,19 @@ interface ActiveChatAction {
   updateActiveChatName: (name: string) => void;
   updateOnlineStatus: (status: boolean) => void;
   updateActiveChatPicture: (picture: string) => void;
+  reset: () => void;
 }
+
+const initialState = {
+  activechatId: 0,
+  activeChatName: "",
+  isOnline: false,
+  activeChatPicture: "",
+};
 
 const useActiveChatStore = create<ActiveChatState & ActiveChatAction>(
   (set) => ({
-    activechatId: 0,
-    activeChatName: "",
-    isOnline: false,
-    activeChatPicture: "",
+    ...initialState,
     updateActiveChatId(id: number) {
       set({ activechatId: id });
     },
@@ -31,6 +36,9 @@ const useActiveChatStore = create<ActiveChatState & ActiveChatAction>(
     },
     updateActiveChatPicture(picture: string) {
       set({ activeChatPicture: picture });
+    },
+    reset() {
+      set(initialState);
     },
   })
 );

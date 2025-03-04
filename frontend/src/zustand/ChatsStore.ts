@@ -23,6 +23,7 @@ interface ChatsAction {
     chatMembers: UserConversationChatMembers[]
   ) => void;
   updateLatestMessage: (newMessage: LatestMessage, chatId: number) => void;
+  reset: () => void;
 }
 
 export const useChatStore = create<Chats & ChatsAction>()(
@@ -100,5 +101,9 @@ export const useChatStore = create<Chats & ChatsAction>()(
           chat.latestMessage = newMessage;
         }
       }),
+
+    reset: () => {
+      set({ chats: [], typingUsers: {} });
+    },
   }))
 );

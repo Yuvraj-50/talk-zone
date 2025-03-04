@@ -18,6 +18,7 @@ interface WebSocketAction {
   disconnect: () => void;
   sendMessage: (message: SocketMessageRequest) => void;
   registerMessageHandler: (type: string, handler: (data: any) => void) => void;
+  resetWebSocket: () => void;
 }
 
 const HEARTBEAT_TIMEOUT = 1000 * 20 + 2 * 1000;
@@ -131,6 +132,11 @@ const useWebSocketStore = create<WebSocketState & WebSocketAction>(
 
       registerMessageHandler(type, handler) {
         messageHandlers.set(type, handler);
+      },
+
+      resetWebSocket() {
+        const { disconnect } = get();
+        disconnect();
       },
     };
   }

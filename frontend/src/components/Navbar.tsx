@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useAuthStore } from "../zustand/authStore";
-import useWebSocketStore from "../zustand/socketStore";
 import { Button } from "./ui/button";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -8,10 +7,10 @@ import { ModeToggle } from "./toggle-mode";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import Loader from "./ui/loader";
+import { resetAllStores } from "@/lib/utils";
 
 function Navbar() {
   const { user, authenticated, logout, loading, setLoading } = useAuthStore();
-  const { disconnect } = useWebSocketStore();
   const navigate = useNavigate();
 
   async function handleLogout() {
@@ -26,7 +25,7 @@ function Navbar() {
 
       if (response.status === 200) {
         logout();
-        disconnect();
+        resetAllStores();
       }
     } catch (error) {
       console.error(error);

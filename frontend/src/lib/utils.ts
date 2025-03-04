@@ -5,6 +5,11 @@ import {
   User,
   UserConversation,
 } from "@/types";
+import useActiveChatStore from "@/zustand/activeChatStore";
+import { useAuthStore } from "@/zustand/authStore";
+import { useChatStore } from "@/zustand/ChatsStore";
+import { useMessagesStore } from "@/zustand/messageStore";
+import useWebSocketStore from "@/zustand/socketStore";
 import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -140,3 +145,11 @@ export const calculateDate = (time: string | number | Date): string => {
     }
   }
 };
+
+export function resetAllStores() {
+  useChatStore.getState().reset();
+  useActiveChatStore.getState().reset();
+  useAuthStore.getState().resetState();
+  useMessagesStore.getState().reset();
+  useWebSocketStore.getState().resetWebSocket();
+}
