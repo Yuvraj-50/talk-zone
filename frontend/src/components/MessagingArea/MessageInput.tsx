@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import useWebSocketStore from "../../zustand/socketStore";
 import useActiveChatStore from "../../zustand/activeChatStore";
-import { MessageType } from "../../types";
+import { ChatMessage, CHATMESSAGETYPES, MessageType, Role } from "../../types";
 import { useAuthStore } from "../../zustand/authStore";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
+import { useMessagesStore } from "@/zustand/messageStore";
+import { useChatStore } from "@/zustand/ChatsStore";
 
 function MessageInput() {
   const [inputValue, setInputValue] = useState<string>("");
@@ -13,6 +15,11 @@ function MessageInput() {
   const sendMessage = useWebSocketStore((state) => state.sendMessage);
   const activechatId = useActiveChatStore((state) => state.activechatId);
   const userName = useAuthStore((state) => state.user?.name);
+  const userId = useAuthStore((state) => state.user?.id);
+  const updateLatestMessage = useChatStore(
+    (state) => state.updateLatestMessage
+  );
+
   const isTypingSent = useRef<boolean>(false);
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -33,18 +40,38 @@ function MessageInput() {
     e.preventDefault();
 
     if (inputValue.trim() === "") return;
+    if (!userId || !userName) return;
 
     if (socket) {
       sendMessage(createTypingPayload(false));
+      const tempId = new Date();
 
-      sendMessage({
+      const messagePayload = {
         type: MessageType.SEND_MESSAGE,
         data: {
           message: inputValue,
           groupId: activechatId,
+          tempId: tempId.getTime(),
         },
-      });
+      };
 
+      const tempessage: ChatMessage = {
+        id: tempId.getTime(),
+        message: inputValue,
+        senderId: userId,
+        sent_at: tempId,
+        chatId: activechatId,
+        userName: userName,
+        status: CHATMESSAGETYPES.PENDING,
+      };
+
+      useMessagesStore.getState().appendMessage(tempessage);
+      updateLatestMessage(
+        { message: inputValue, senderId: userId, sent_at: tempId },
+        activechatId
+      );
+      
+      sendMessage(messagePayload);
       setInputValue("");
       isTypingSent.current = false;
     }

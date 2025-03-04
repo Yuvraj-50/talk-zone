@@ -11,6 +11,7 @@ import {
   TypingIndicator,
   UpdateOnlineStatus,
   UserConversation,
+  CHATMESSAGETYPES,
 } from "@/types";
 import useActiveChatStore from "@/zustand/activeChatStore";
 import { useAuthStore } from "@/zustand/authStore";
@@ -46,6 +47,21 @@ function useRegisterHandlers() {
   const userId = useAuthStore((state) => state.user?.id);
   const { socket, registerMessageHandler, sendMessage } = useWebSocketStore();
 
+  function moveChatToTop(chatId: number) {
+    const prevIdx = chats.findIndex((chat) => chat.chatId === chatId);
+
+    if (prevIdx !== -1) {
+      if (chats[prevIdx].chatId != chats[0].chatId) {
+        const moveTofirstChat = chats[prevIdx];
+        const newList = [
+          moveTofirstChat,
+          ...chats.filter((_, index) => index !== prevIdx),
+        ];
+        updateChat(newList);
+      }
+    }
+  }
+
   useEffect(() => {
     registerMessageHandler(MessageType.SEND_MESSAGE, (message: ChatMessage) => {
       if (message.chatId === activechatId) {
@@ -63,19 +79,8 @@ function useRegisterHandlers() {
         updateUnreadCount(message.chatId);
       }
 
-      const prevIdx = chats.findIndex((chat) => chat.chatId === message.chatId);
+      moveChatToTop(message.chatId);
 
-      if (prevIdx !== -1) {
-        if (chats[prevIdx].chatId != chats[0].chatId) {
-          const moveTofirstChat = chats[prevIdx];
-          const newList = [
-            moveTofirstChat,
-            ...chats.filter((_, index) => index !== prevIdx),
-          ];
-          updateChat(newList);
-        }
-      }
-      
       updateLatestMessage(
         {
           message: message.message,
@@ -85,6 +90,31 @@ function useRegisterHandlers() {
         message.chatId
       );
     });
+
+    registerMessageHandler(
+      MessageType.MESSAGE_OPTIMISTIC,
+      (message: { id: number }) => {
+        useMessagesStore.setState((state) => ({
+          messages: state.messages.map((msg) =>
+            msg.id === message.id
+              ? { ...msg, status: CHATMESSAGETYPES.SENT }
+              : msg
+          ),
+        }));
+        moveChatToTop(activechatId);
+      }
+    );
+
+    registerMessageHandler(
+      MessageType.UPDATE_TEMPID,
+      (message: { tempId: number; realId: number }) => {
+        useMessagesStore.setState((state) => ({
+          messages: state.messages.map((msg) =>
+            msg.id === message.tempId ? { ...msg, id: message.realId } : msg
+          ),
+        }));
+      }
+    );
 
     registerMessageHandler(
       MessageType.CREATE_CHAT,

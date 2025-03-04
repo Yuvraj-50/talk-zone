@@ -14,15 +14,21 @@ export enum Role {
   "ADMIN",
 }
 
+export enum CHATMESSAGETYPES {
+  PENDING = "PENDING",
+  SENT = "SENT",
+  FAILED = "FAILED",
+}
+// TODO: OPMISTIC MESSAGE RENDER IN THE FRONTEND UI MESSAGES ;
 export interface ChatMessage {
   id: number;
   message: string;
   senderId: number;
   sent_at: Date;
   chatId: number;
-  role: Role;
-  userId: number;
   userName: string;
+  status: CHATMESSAGETYPES;
+  tempId?: number;
 }
 
 export interface ChatMembers {
@@ -67,6 +73,8 @@ export enum MessageType {
   ERROR = "ERROR",
   UNREADMESSAGECOUNT = "UNREADMESSAGECOUNT",
   ADD_MEMBER = "ADD_MEMBER",
+  UPDATE_TEMPID = "UPDATE_TEMPID",
+  MESSAGE_OPTIMISTIC = "MESSAGE_OPTIMISTIC",
 }
 
 export interface UpdateOnlineStatus {
