@@ -23,19 +23,16 @@ const initialState: AuthState = {
 
 export const useAuthStore = create<AuthState & AuthAction>()((set) => ({
   ...initialState,
-  
-  updateAuth: (auth: Partial<AuthState>) => 
+
+  updateAuth: (auth: Partial<AuthState>) =>
     set((state) => ({ ...state, ...auth })),
-  
-  setLoading: (val: boolean) => 
-    set((state) => ({ ...state, loading: val })),
-  
-  setUser: (user: User | null) => 
-    set((state) => ({ ...state, user })),
-  
-  setAuthenticated: (val: boolean) => 
+
+  setLoading: (val: boolean) => set((state) => ({ ...state, loading: val })),
+
+  setUser: (user: User | null) => set((state) => ({ ...state, user })),
+
+  setAuthenticated: (val: boolean) =>
     set((state) => ({ ...state, authenticated: val })),
-  
-  
+
   resetState: () => set(initialState),
 }));
