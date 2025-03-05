@@ -4,7 +4,17 @@ import cors from "cors";
 
 const app = express();
 
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:8080",
+    ],
+    credentials: true,
+  })
+);
 
 const routes: Record<string, string> = {
   "/api/v1/auth": "http://localhost:9000/api/v1/auth",
