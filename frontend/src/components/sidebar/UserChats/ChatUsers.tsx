@@ -1,9 +1,7 @@
-import changeChat from "@/lib";
-import { MessageType, UserConversation } from "@/types";
+import {changeChat} from "@/lib";
+import { UserConversation } from "@/types";
 import useActiveChatStore from "@/zustand/activeChatStore";
 import { useChatStore } from "@/zustand/ChatsStore";
-import { useMessagesStore } from "@/zustand/messageStore";
-import useWebSocketStore from "@/zustand/socketStore";
 import CreateChat from "../CreateNewChat/CreateChat";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { memo } from "react";
@@ -14,44 +12,14 @@ function ChatUsers({
 }: {
   setMessageLoading: (loading: boolean) => void;
 }) {
-  const { chats, resetUnreadCount } = useChatStore();
-  const { updateMessages } = useMessagesStore();
-  const {
-    updateActiveChatId,
-    updateActiveChatName,
-    activechatId,
-    updateActiveChatPicture,
-  } = useActiveChatStore();
-  const socket = useWebSocketStore((state) => state.socket);
-  const sendMessage = useWebSocketStore((state) => state.sendMessage);
+  const chats = useChatStore((state) => state.chats);
+  const activechatId = useActiveChatStore((state) => state.activechatId);
 
   async function handleChangeChat(chat: UserConversation) {
-    const { chatId: id, chatName } = chat;
-    if (id === activechatId) return;
     setMessageLoading(true);
-    updateMessages([]);
-    updateActiveChatId(id);
-    updateActiveChatName(chatName);
-    updateActiveChatPicture(chat.profilePicture);
-    const messages = await changeChat(id);
-    resetUnreadCount(id);
-    updateMessages(messages);
+    await changeChat(chat);
     setMessageLoading(false);
-    const chatToChange = chats.find((chat) => chat.chatId == id);
-
-    if (socket && (chatToChange?.unreadCount ?? 0) > 0) {
-      const payload = {
-        type: MessageType.UNREADMESSAGECOUNT,
-        data: {
-          chatId: id,
-        },
-      };
-
-      sendMessage(payload);
-    }
   }
-
-  console.log("Component Rendered");
 
   return (
     <>

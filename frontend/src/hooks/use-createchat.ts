@@ -1,23 +1,13 @@
-import changeChat from "@/lib";
+import { changeChat } from "@/lib";
 import { ChatMembers, CHATTYPE, MessageType, UserConversation } from "@/types";
-import useActiveChatStore from "@/zustand/activeChatStore";
 import { useAuthStore } from "@/zustand/authStore";
 import { useChatStore } from "@/zustand/ChatsStore";
 import useLoadersStore from "@/zustand/loaderStore";
-import { useMessagesStore } from "@/zustand/messageStore";
 import useWebSocketStore from "@/zustand/socketStore";
 
 const useCreateChat = () => {
   const user = useAuthStore((state) => state.user);
   const chats = useChatStore((state) => state.chats);
-  const updateMessages = useMessagesStore((state) => state.updateMessages);
-  const {
-    activechatId,
-    updateActiveChatId,
-    updateActiveChatName,
-    updateActiveChatPicture,
-  } = useActiveChatStore();
-  const resetUnreadCount = useChatStore((state) => state.resetUnreadCount);
   const { socket, sendMessage } = useWebSocketStore();
   const setLoading = useLoadersStore((state) => state.setLoading);
 
@@ -27,6 +17,8 @@ const useCreateChat = () => {
     );
 
     for (const chat of chats) {
+      if (chat.chatType == CHATTYPE.GROUPCHAT) continue;
+
       const sortedMember = [...chat.chatMembers].sort((a, b) =>
         a.userEmail.toLowerCase().localeCompare(b.userEmail.toLowerCase())
       );
@@ -43,25 +35,7 @@ const useCreateChat = () => {
   }
 
   async function handleExistingChat(chat: UserConversation) {
-    if (activechatId == chat.chatId) return;
-    updateMessages([]);
-    updateActiveChatId(chat.chatId);
-    updateActiveChatName(chat.chatName);
-    updateActiveChatPicture(chat.profilePicture);
-    const messages = await changeChat(chat.chatId);
-    resetUnreadCount(chat.chatId);
-    updateMessages(messages);
-    const chatToChange = chats.find((chat) => chat.chatId == chat.chatId);
-    if (socket && (chatToChange?.unreadCount ?? 0) > 0) {
-      const payload = {
-        type: MessageType.UNREADMESSAGECOUNT,
-        data: {
-          chatId: chat.chatId,
-        },
-      };
-
-      sendMessage(payload);
-    }
+    await changeChat(chat);
   }
 
   async function createNewChat(

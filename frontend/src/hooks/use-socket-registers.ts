@@ -1,4 +1,4 @@
-import changeChat from "@/lib";
+import { selectChat } from "@/lib";
 import {
   fetchUserProfile,
   getUserIds,
@@ -37,13 +37,10 @@ function useRegisterHandlers() {
   } = useChatStore();
 
   const {
-    updateActiveChatId,
-    updateActiveChatName,
     activechatId,
     updateActiveChatPicture,
   } = useActiveChatStore();
 
-  const updateMessages = useMessagesStore((state) => state.updateMessages);
   const userId = useAuthStore((state) => state.user?.id);
   const { socket, registerMessageHandler, sendMessage } = useWebSocketStore();
 
@@ -121,18 +118,11 @@ function useRegisterHandlers() {
       async (message: UserConversation) => {
         setLoading("CREATE_CHAT", false);
         if (message.createdBy == userId) {
-          updateActiveChatPicture("");
-          updateActiveChatId(message.chatId);
-          updateActiveChatName(message.chatName);
-          updateMessages([]);
-          setMessageLoading(true);
-          const messages = await changeChat(message.chatId);
-          setMessageLoading(false);
-          updateMessages(messages);
+          selectChat("", message.chatId, message.chatName);
           const messageArr = [message];
           const userIds = getUserIds(messageArr);
           const userProfiles = await fetchUserProfile(userIds);
-          processUserProfileAndBio(messageArr, userId, userProfiles.users);
+          processUserProfileAndBio(messageArr, userId, userProfiles);
           message = messageArr[0];
           updateActiveChatPicture(message.profilePicture);
         }
