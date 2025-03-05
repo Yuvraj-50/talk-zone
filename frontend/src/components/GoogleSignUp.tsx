@@ -1,7 +1,6 @@
-import { AuthResponse } from "@/types";
+import { googleLogin } from "@/api/auth";
 import { useAuthStore } from "@/zustand/authStore";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -13,28 +12,20 @@ function GoogleSignUp() {
 
   async function handleGoogleSignUp(credentialResponse: CredentialResponse) {
     try {
-      setLoading(true);
-      const response = await axios.post<AuthResponse>(
-        "http://localhost:9000/api/v1/auth/googleLogin",
-        {
-          token: credentialResponse.credential,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      const { user } = response.data;
-
-      if (user) {
-        setUser(user);
-        setAuthenticated(true);
+      if (!credentialResponse.credential) {
+        setError("something Went wrong Try agin");
+        return;
       }
+      setLoading(true);
+      const data = await googleLogin(credentialResponse.credential);
+      const { user } = data;
+      setUser(user);
+      setAuthenticated(true);
       setLoading(false);
     } catch (error) {
       setLoading(false);
       setError("Google login failed");
-      console.log("error", "google login", error);
+      console.log(error);
     }
   }
 
@@ -57,7 +48,7 @@ function GoogleSignUp() {
           setLoading(false);
         }}
       />
-      {error && <p>{error + "try again later"}</p>}
+      {error && <p>{error + " try again later"}</p>}
     </>
   );
 }

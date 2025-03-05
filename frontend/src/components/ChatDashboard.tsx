@@ -17,12 +17,12 @@ import { AlertTitle } from "./ui/alert";
 import AlertLoading from "./ui/alert-loading";
 import {
   fetchUserProfile,
-  getAllChats,
   getUserIds,
   processUserProfileAndBio,
 } from "@/lib/utils";
 import { useAuthStore } from "@/zustand/authStore";
 import { useChatStore } from "@/zustand/ChatsStore";
+import { getUserChats } from "@/api/chat";
 
 function ChatDashboard() {
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -38,16 +38,12 @@ function ChatDashboard() {
     setIsChatLoading(true);
     async function getUserAllChats() {
       try {
-        const userChatData = await getAllChats();
+        const userChatData = await getUserChats();
         if (!userChatData) return;
         const userId: number[] = getUserIds(userChatData);
         const userProfileBio = await fetchUserProfile(userId);
         if (loggedInUser) {
-          processUserProfileAndBio(
-            userChatData,
-            loggedInUser,
-            userProfileBio.users
-          );
+          processUserProfileAndBio(userChatData, loggedInUser, userProfileBio);
           updateChat(userChatData);
         }
       } catch (error) {

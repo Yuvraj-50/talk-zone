@@ -1,3 +1,4 @@
+import { getUserProfiles } from "@/api/auth";
 import {
   ChatMembers,
   CHATTYPE,
@@ -10,7 +11,6 @@ import { useAuthStore } from "@/zustand/authStore";
 import { useChatStore } from "@/zustand/ChatsStore";
 import { useMessagesStore } from "@/zustand/messageStore";
 import useWebSocketStore from "@/zustand/socketStore";
-import axios from "axios";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -42,28 +42,8 @@ export function evalActiveChatProfile(
 }
 
 export async function fetchUserProfile(chatIds: number[]) {
-  const response = await axios.post<{ users: UpdateProfileAndBio[] }>(
-    "http://localhost:9000/api/v1/auth/userProfiles",
-    { users: chatIds },
-    { withCredentials: true }
-  );
-
-  return response.data;
-}
-
-export async function getAllChats() {
-  try {
-    const response = await axios.get<UserConversation[]>(
-      "http://localhost:3000/api/v1/chat",
-      {
-        withCredentials: true,
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch chats", error);
-  }
+  const data = await getUserProfiles(chatIds);
+  return data;
 }
 
 export function processUserProfileAndBio(

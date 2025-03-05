@@ -20,6 +20,7 @@ import { HoverCard, HoverCardTrigger } from "./ui/hover-card";
 import { HoverCardContent } from "@radix-ui/react-hover-card";
 import { AuthResponse } from "@/types";
 import Loader from "./ui/loader";
+import { signup } from "@/api/auth";
 
 interface FormStateType {
   email: string;
@@ -91,17 +92,9 @@ function SignUpForm({
       if (image) {
         formData.append("photo", image);
       }
-
-      const response = await axios.post<AuthResponse>(
-        "http://localhost:9000/api/v1/auth/signup",
-        formData,
-        { withCredentials: true }
-      );
-
+      const data = await signup(formData);
       setFormState(initialState);
-
-      const { user } = response.data;
-
+      const { user } = data;
       if (user) {
         setUser(user);
         setAuthenticated(true);

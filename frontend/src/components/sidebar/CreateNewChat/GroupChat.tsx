@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Dispatch, SetStateAction } from "react";
-import axios from "axios";
 import { ChatMembers, User } from "../../../types";
 import { CircleArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -9,10 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-
-type UserDate = {
-  users: User[];
-};
+import { getUsers } from "@/api/auth";
 
 interface GroupChatProps {
   memberList: ChatMembers[];
@@ -66,13 +62,16 @@ function GroupChat({
       return;
     }
 
-    axios
-      .get<UserDate>(`http://localhost:9000/api/v1/auth/getUsers/${search}`, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        setUsers([...res.data.users]);
-      });
+    async function fetchUsers() {
+      try {
+        const data = await getUsers(search);
+        setUsers([...data.users]);
+      } catch (error) {
+        console.log("something went wrong");
+      }
+    }
+
+    fetchUsers();
   }, [search]);
 
   return (

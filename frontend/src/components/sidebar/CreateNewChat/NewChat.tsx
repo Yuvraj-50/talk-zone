@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useAuthStore } from "../../../zustand/authStore";
-import axios from "axios";
 import { ChatMembers, CHATTYPE, User } from "../../../types";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,10 +10,7 @@ import Adduseritem from "@/components/Adduseritem";
 import useCreateChat from "@/hooks/use-createchat";
 import { addCurrentUser } from "@/lib/utils";
 import useLoadersStore from "@/zustand/loaderStore";
-
-interface UserDate {
-  users: User[];
-}
+import { getUsers } from "@/api/auth";
 
 interface NewChatProps {
   changeStep: Dispatch<SetStateAction<number>>;
@@ -49,15 +45,16 @@ function NewChat({ changeStep, setIsPopOverOpen }: NewChatProps) {
       setUsers([]);
       return;
     }
+    async function fetchUsers() {
+      try {
+        const data = await getUsers(search);
+        setUsers([...data.users]);
+      } catch (error) {
+        console.log("something went wrong");
+      }
+    }
 
-    axios
-      .get<UserDate>(`http://localhost:9000/api/v1/auth/getUsers/${search}`, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        console.log(res.data.users);
-        setUsers(() => [...res.data.users]);
-      });
+    fetchUsers();
   }, [search]);
 
   return (

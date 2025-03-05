@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useAuthStore } from "../zustand/authStore";
 import { Button } from "./ui/button";
 import { Avatar } from "@radix-ui/react-avatar";
@@ -8,25 +7,17 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import Loader from "./ui/loader";
 import { resetAllStores } from "@/lib/utils";
+import { logout } from "@/api/auth";
 
 function Navbar() {
-  const { user, authenticated, logout, loading, setLoading } = useAuthStore();
+  const { user, authenticated, loading, setLoading } = useAuthStore();
   const navigate = useNavigate();
 
   async function handleLogout() {
     try {
       setLoading(true);
-      const response = await axios.get(
-        "http://localhost:9000/api/v1/auth/logout",
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (response.status === 200) {
-        logout();
-        resetAllStores();
-      }
+      await logout();
+      resetAllStores();
     } catch (error) {
       console.error(error);
     } finally {

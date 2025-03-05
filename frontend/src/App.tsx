@@ -6,11 +6,13 @@ import { useEffect } from "react";
 import useWebSocketStore from "./zustand/socketStore";
 import { Toaster } from "./components/ui/toaster";
 
+const WEBSOCKET_SERVER_URL = import.meta.env.VITE_WEBSOCKET_SERVER_URL;
+
 function App() {
   const { connect, disconnect } = useWebSocketStore();
 
   useEffect(() => {
-    connect("ws://localhost:3000");
+    connect(WEBSOCKET_SERVER_URL);
     return () => {
       disconnect();
     };

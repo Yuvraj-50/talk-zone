@@ -1,12 +1,5 @@
-import axios from "axios";
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
-
-type FormStateType = {
-  email: string;
-  password: string;
-};
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,17 +13,24 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useAuthStore } from "@/zustand/authStore";
 import GoogleSignUp from "./GoogleSignUp";
-import { AuthResponse } from "@/types";
 import Loader from "./ui/loader";
+import { login } from "@/api/auth";
+
+interface FormStateType {
+  email: string;
+  password: string;
+}
+
+const initialState = {
+  email: "",
+  password: "",
+};
 
 function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [formState, setFormState] = useState<FormStateType>({
-    email: "",
-    password: "",
-  });
+  const [formState, setFormState] = useState<FormStateType>(initialState);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -54,26 +54,14 @@ function LoginForm({
 
     try {
       setLoading(true);
-      const response = await axios.post<AuthResponse>(
-        "http://localhost:9000/api/v1/auth/login",
-        {
-          email: formState.email,
-          password: formState.password,
-        },
-        { withCredentials: true }
-      );
-
-      setFormState({ email: "", password: "" });
-
-      const { user } = response.data;
-
-      if (user) {
-        setUser(user);
-        setAuthenticated(true);
-      }
+      const data = await login(formState.email, formState.password);
+      setFormState(initialState);
+      const { user } = data;
+      setUser(user);
+      setAuthenticated(true);
       setLoading(false);
     } catch (error: any) {
-      setError(error.response.data.message);
+      setError(error);
       setLoading(false);
       console.log("Invalid userName or password");
     }
@@ -89,7 +77,7 @@ function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         {error && (
-          <div className="p-3 text-sm bg-red-100 border border-red-300 text-red-600 rounded-md">
+          <div className="p-3 text-s border-destructive bg-destructive rounded-md">
             {error}
           </div>
         )}
