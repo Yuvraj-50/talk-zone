@@ -13,7 +13,6 @@ type AuthAction = {
   setUser: (user: User | null) => void;
   setAuthenticated: (val: boolean) => void;
   resetState: () => void;
-  logout: () => void;
 };
 
 const initialState: AuthState = {
@@ -39,9 +38,4 @@ export const useAuthStore = create<AuthState & AuthAction>()((set) => ({
   
   
   resetState: () => set(initialState),
-  
-  logout: () => set({ 
-    user: null, 
-    authenticated: false, 
-  }),
 }));
