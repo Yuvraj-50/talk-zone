@@ -57,9 +57,9 @@ function MessageArea({ messageLoading }: { messageLoading: boolean }) {
                 <div
                   className={`px-4 py-2 rounded-2xl ${
                     isOwnMessage
-                      ? "bg-primary text-primary-foreground "
+                      ? "bg-primary text-primary-foreground"
                       : "bg-secondary "
-                  }`}
+                  } ${message.status == "PENDING" && "opacity-50"} `}
                 >
                   {message.message}
                 </div>
