@@ -31,7 +31,7 @@ export async function authMiddleWare(
         return;
       }
       req.user = user as JWTPAYLOAD;
+      next();
     }
   );
-  next();
 }
