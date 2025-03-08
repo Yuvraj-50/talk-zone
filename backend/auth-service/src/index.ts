@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { ensureUploadDirExist } from "./middleware/multer";
 import { hello } from "./utils/cloudnary";
+import prisma from "./utils/db";
 
 dotenv.config();
 
@@ -18,13 +19,14 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
+      "http://api-gateway:8080:",
     ],
     credentials: true,
   })
 );
 
-app.use("/health", (req, res) => {
-  res.send("ok");
+app.use("/api/v1/auth/health", (req, res) => {
+  res.send("helth");
   return;
 });
 
@@ -39,3 +41,12 @@ app.listen(port, () => {
   });
   hello();
 });
+
+setInterval(async () => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    console.log("🔥 Keeping Neon DB active");
+  } catch (error) {
+    console.error("❌ Failed to ping DB:", error);
+  }
+}, 300000);
