@@ -15,6 +15,7 @@ import { useAuthStore } from "@/zustand/authStore";
 import GoogleSignUp from "./GoogleSignUp";
 import Loader from "./ui/loader";
 import { login } from "@/api/auth";
+import useWebSocketStore from "@/zustand/socketStore";
 
 interface FormStateType {
   email: string;
@@ -37,6 +38,7 @@ function LoginForm({
   const navigate = useNavigate();
   const { setUser, setAuthenticated, authenticated, loading, setLoading } =
     useAuthStore();
+  const { connect, disconnect } = useWebSocketStore();
 
   function handleStateUpdate(e: React.ChangeEvent<HTMLInputElement>) {
     const key = e.target.type;
@@ -71,6 +73,10 @@ function LoginForm({
     if (authenticated) {
       navigate("/", { replace: true });
     }
+
+    return () => {
+      disconnect();
+    };
   }, [authenticated]);
 
   return (

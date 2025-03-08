@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { MessageType } from "../types";
 import { WebSocketExt } from "../types/ws";
 import { useAuthStore } from "./authStore";
+import { WEBSOCKET_SERVER_URL } from "@/lib/constant";
 
 interface WebSocketState {
   socket: WebSocket | null;
@@ -89,7 +90,9 @@ const useWebSocketStore = create<WebSocketState & WebSocketAction>(
             clearTimeout(ws.pingTimeOut);
           }
 
-          reconnect(url);
+          if (useAuthStore.getState().authenticated) {
+            setTimeout(() => get().connect(url), RECONNECT_DELAY);
+          }
         };
 
         ws.onerror = (error) => {
@@ -141,5 +144,12 @@ const useWebSocketStore = create<WebSocketState & WebSocketAction>(
     };
   }
 );
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    console.log("Internet restored. Reconnecting WebSocket...");
+    useWebSocketStore.getState().connect(WEBSOCKET_SERVER_URL);
+  });
+}
 
 export default useWebSocketStore;
