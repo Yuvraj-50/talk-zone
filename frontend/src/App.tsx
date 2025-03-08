@@ -5,25 +5,25 @@ import { MyRouter } from "./lib/route";
 import { useEffect } from "react";
 import useWebSocketStore from "./zustand/socketStore";
 import { Toaster } from "./components/ui/toaster";
-
-const WEBSOCKET_SERVER_URL = import.meta.env.VITE_WEBSOCKET_SERVER_URL;
+import { useAuthStore } from "./zustand/authStore";
+import { CLIENTID, WEBSOCKET_SERVER_URL } from "./lib/constant";
 
 function App() {
   const { connect, disconnect } = useWebSocketStore();
+  const authenticated = useAuthStore((state) => state.authenticated);
 
   useEffect(() => {
-    connect(WEBSOCKET_SERVER_URL);
-    return () => {
+    if (authenticated) {
+      connect(WEBSOCKET_SERVER_URL);
+    } else {
       disconnect();
-    };
-  }, []);
-
-  const cliendId = import.meta.env.VITE_CLIENTID;
+    }
+  }, [authenticated]);
 
   return (
     <ThemeProvider defaultTheme="violet" storageKey="ui-theme">
       <BrowserRouter>
-        <GoogleOAuthProvider clientId={cliendId}>
+        <GoogleOAuthProvider clientId={CLIENTID}>
           <MyRouter />
           <Toaster />
         </GoogleOAuthProvider>
