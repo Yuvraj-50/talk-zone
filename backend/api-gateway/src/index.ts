@@ -10,6 +10,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
+      "http://localhost:5176",
       "http://localhost:8080",
     ],
     credentials: true,
@@ -30,6 +31,6 @@ for (let route in routes) {
   app.use(route, proxyMiddleware);
 }
 
-app.listen(8080, () => {
+app.listen(8080, "0.0.0.0", () => {
   console.log("Server is running on port 8080");
 });

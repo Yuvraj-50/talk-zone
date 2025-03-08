@@ -34,7 +34,7 @@ app.use("/api/v1/auth", userRouter);
 
 const port = process.env.PORT || 9000;
 
-app.listen(port, () => {
+app.listen(Number(port), "0.0.0.0", () => {
   console.log(`Server is running on port ${port}`);
   ensureUploadDirExist().then(() => {
     console.log("multer folder is ready");

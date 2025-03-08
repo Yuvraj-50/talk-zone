@@ -12,7 +12,7 @@ dotenv.config();
 function startServer() {
   const app: Express = express();
 
-  const PORT: Number = Number(process.env.PORT) || 3000;
+  const PORT: number = Number(process.env.PORT) || 3000;
 
   app.use(
     cors({
@@ -36,7 +36,7 @@ function startServer() {
 
   app.use("/api/v1/chat", chatRouter);
 
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on port ${PORT}`);
     configureCloudinary();
   });

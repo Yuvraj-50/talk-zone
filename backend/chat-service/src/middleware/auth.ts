@@ -17,7 +17,10 @@ export async function authMiddleWare(
 ) {
   const token = req.cookies.jwt;
 
-  if (!token) return;
+  if (!token) {
+    res.json("invalid token no access token");
+    return;
+  }
 
   jwt.verify(
     token,
