@@ -21,6 +21,7 @@ function startServer() {
         "http://localhost:5174",
         "http://localhost:5175",
         "http://api-gateway:8080",
+        "http://chat.yuvaraj.tech",
       ],
       credentials: true,
     })
