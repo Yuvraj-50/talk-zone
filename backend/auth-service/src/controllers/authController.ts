@@ -60,8 +60,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
       path: "/",
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
     });
 
     res
@@ -102,8 +102,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
     });
 
     res.status(200).json({ msg: "login success", user: jwtPayload });
@@ -161,8 +161,8 @@ export const googleLogin = async (
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
     });
 
     res.status(200).json({ msg: "Google login successful", user });
