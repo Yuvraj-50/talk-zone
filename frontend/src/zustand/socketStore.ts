@@ -55,21 +55,21 @@ const useWebSocketStore = create<WebSocketState & WebSocketAction>(
   (set, get) => {
     const messageHandlers: Map<string, (data: any) => void> = new Map();
 
-    const reconnect = (url: string) => {
-      const userAuthenticated = useAuthStore.getState().authenticated;
-      if (!userAuthenticated) return;
+    // const reconnect = (url: string) => {
+    //   const userAuthenticated = useAuthStore.getState().authenticated;
+    //   if (!userAuthenticated) return;
 
-      const { reconnectTimeout } = get();
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout);
-      }
+    //   const { reconnectTimeout } = get();
+    //   if (reconnectTimeout) {
+    //     clearTimeout(reconnectTimeout);
+    //   }
 
-      const timeout = setTimeout(() => {
-        get().connect(url);
-      }, RECONNECT_DELAY);
+    //   const timeout = setTimeout(() => {
+    //     get().connect(url);
+    //   }, RECONNECT_DELAY);
 
-      set({ reconnectTimeout: timeout });
-    };
+    //   set({ reconnectTimeout: timeout });
+    // };
 
     return {
       socket: null,

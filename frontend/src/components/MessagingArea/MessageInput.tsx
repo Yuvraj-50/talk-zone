@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import useWebSocketStore from "../../zustand/socketStore";
 import useActiveChatStore from "../../zustand/activeChatStore";
-import { ChatMessage, CHATMESSAGETYPES, MessageType, Role } from "../../types";
+import { ChatMessage, CHATMESSAGETYPES, MessageType } from "../../types";
 import { useAuthStore } from "../../zustand/authStore";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";

@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
@@ -18,7 +17,6 @@ import { Textarea } from "./ui/textarea";
 import GoogleSignUp from "./GoogleSignUp";
 import { HoverCard, HoverCardTrigger } from "./ui/hover-card";
 import { HoverCardContent } from "@radix-ui/react-hover-card";
-import { AuthResponse } from "@/types";
 import Loader from "./ui/loader";
 import { signup } from "@/api/auth";
 

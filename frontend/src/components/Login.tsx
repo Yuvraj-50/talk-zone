@@ -38,7 +38,7 @@ function LoginForm({
   const navigate = useNavigate();
   const { setUser, setAuthenticated, authenticated, loading, setLoading } =
     useAuthStore();
-  const { connect, disconnect } = useWebSocketStore();
+  const { disconnect } = useWebSocketStore();
 
   function handleStateUpdate(e: React.ChangeEvent<HTMLInputElement>) {
     const key = e.target.type;

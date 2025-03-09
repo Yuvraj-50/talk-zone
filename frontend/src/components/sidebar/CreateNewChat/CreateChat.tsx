@@ -2,7 +2,7 @@ import { memo, useState } from "react";
 import GroupChat from "./GroupChat";
 import NewChat from "./NewChat";
 import GroupDetails from "./GroupDetails";
-import { ChatMembers, CHATTYPE } from "../../../types";
+import { ChatMembers } from "../../../types";
 import { SquarePlus } from "lucide-react";
 import {
   Popover,
